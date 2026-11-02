@@ -15,11 +15,11 @@ import { RIDING, solveLimb } from '@/game/character/riding';
 import { createBodyRig, type BodyRig, type HandSide } from '@/game/character/body-rig';
 import { createHandRig } from '@/game/character/hand-rig';
 import { createBootRig } from '@/game/character/boot-rig';
-import { createMotionController } from '@/game/character/motion-controller';
+import { createMotionController, type MotionFrame } from '@/game/character/motion-controller';
 import { createSurfaceMap, conformToSurface, type SurfaceMap } from '@/game/character/surface-map';
 import { isolateAccessoryMaterials, setFabricStyle, setHairDye, stampStyleCoordinates } from '@/game/character/style-materials';
 
-export type AvatarMotion = { moving: boolean; speed: number; grounded: boolean; dancing: boolean; sitting: boolean; vehicle?:VehicleId|null };
+export type AvatarMotion = { moving: boolean; speed: number; grounded: boolean; dancing: boolean; sitting: boolean; vehicle?:VehicleId|null; locomotionFrame?:MotionFrame };
 export type Avatar = {
   group: THREE.Group;
   rig: BodyRig;
@@ -501,7 +501,8 @@ export function createAvatar(): Avatar {
       if(motion.sitting){state.actionActive=false;state.actionElapsed=0;}
       else if(state.actionActive){state.actionElapsed=Math.min(1.05,state.actionElapsed+step);if(state.actionElapsed>=1.05)state.actionActive=false;}
       const soleHeight={heels:.099,sneakers:.09,sandals:.075,platforms:.106,boots:.094}[state.shoes];
-      const frame=controller.update(step,{...motion,pose:state.pose,dancing:motion.dancing||state.cheer>0,heading:group.rotation.y,soleHeight,armSpace:['gown','pleated','tennis','wrap'].includes(state.look.bottom)?.045:0,carry:state.actionActive&&state.carry==='none'?'one-hand':state.carry,swing:state.actionActive?state.actionElapsed/1.05:null});
+      const pedestrian=motion.moving&&motion.grounded&&!motion.sitting&&!motion.dancing&&state.cheer<=0?motion.locomotionFrame:undefined;
+      const frame=pedestrian??controller.update(step,{...motion,pose:state.pose,dancing:motion.dancing||state.cheer>0,heading:group.rotation.y,soleHeight,armSpace:['gown','pleated','tennis','wrap'].includes(state.look.bottom)?.045:0,carry:state.actionActive&&state.carry==='none'?'one-hand':state.carry,swing:state.actionActive?state.actionElapsed/1.05:null});
       state.phase=frame.phase;pelvis.position.y=frame.pelvisY;neck.rotation.set(0,0,0);
       // The controller already blends actions. A second joint filter would drag solved feet.
       for(const [key,rotation] of Object.entries(frame.rotations)) {
@@ -529,7 +530,7 @@ export function createAvatar(): Avatar {
       for(const boot of bootRigs)if(boot.root.visible)boot.update();
       for(const trousers of trouserRigs)if(trousers.root.visible)trousers.update();
       if(necklace.visible)necklaceRig.update(step,{...motion,phase:state.phase});
-      for(const item of garmentRigs)if(item.skirt.parent?.visible)item.rig.update(step,{...motion,pose:!motion.moving&&!motion.sitting?state.pose:'idle',phase:state.phase},activeBottom!==state.look.bottom);
+      for(const item of garmentRigs)if(item.skirt.parent?.visible)item.rig.update(step,{...motion,speed:pedestrian?4.5:motion.speed,pose:!motion.moving&&!motion.sitting?state.pose:'idle',phase:state.phase},activeBottom!==state.look.bottom);
       activeBottom=state.look.bottom;
       for(const item of hairRigs)if(item.sway.parent?.visible)item.rig.update(step,{...motion,phase:state.phase});
 

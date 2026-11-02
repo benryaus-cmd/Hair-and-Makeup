@@ -141,3 +141,18 @@ export function createBuilder(colliders: ColliderBox[]): Builder {
     },
   };
 }
+/** Move a complete venue without separating its visuals from collider data. */
+export function translatedBuilder(base:Builder,dx:number,dz:number):Builder {
+  const group=new THREE.Group();
+  group.position.set(dx,0,dz);
+  base.group.add(group);
+  return {
+    group,
+    add:(geo,mat,x=0,y=0,z=0)=>base.add(geo,mat,x+dx,y,z+dz),
+    box:(w,h,d,mat,x,y,z,ry=0)=>base.box(w,h,d,mat,x+dx,y,z+dz,ry),
+    solid:(w,h,d,mat,x,y,z,ry=0)=>base.solid(w,h,d,mat,x+dx,y,z+dz,ry),
+    cyl:(top,bottom,h,segments,mat,x,y,z)=>base.cyl(top,bottom,h,segments,mat,x+dx,y,z+dz),
+    sphere:(radius,mat,x,y,z)=>base.sphere(radius,mat,x+dx,y,z+dz),
+    collider:(x,y,z,hx,hy,hz)=>base.collider(x+dx,y,z+dz,hx,hy,hz),
+  };
+}

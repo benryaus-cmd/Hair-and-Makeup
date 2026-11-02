@@ -11,11 +11,11 @@ export function StudioBoot({state,onSkip,onRetry,onLowQuality}:Props){
   const final=setTimeout(()=>setShot(2),4700);
   return()=>{clearTimeout(middle);clearTimeout(final);};
  },[state.phase]);
- const chapters=['THE COAST IS CALLING','FIND YOUR SIGNATURE','YOUR NEXT STORY STARTS HERE'];
+ const chapters=['THE FIRST LOOK','FRONT ROW','MAKE YOUR ENTRANCE'];
  if(state.phase==='playing')return null;
  if(state.phase==='arrival')return <section className="studio-arrival" aria-label="Welcome to Hair and Makeup">
   <div className="arrival-top"><span>HAIR & MAKEUP</span><span>{chapters[shot]} · 0{shot+1}</span></div>
-  <div className="arrival-copy"><span className="studio-eyebrow">A LITTLE SUN. A LITTLE SPARKLE.</span><h1>Make it<br/><em>your world.</em></h1><p>Style a look. Find your people. Chase the light.</p></div>
+  <div className="arrival-copy"><span className="studio-eyebrow">COLLECTION 01 · YOUR SIGNATURE</span><h1>The first<br/><em>look.</em></h1><p>Own the runway. Make your mark.</p></div>
   <button type="button" className="arrival-skip" onClick={onSkip}>Let’s explore <ArrowRight size={17}/></button>
   <div className="arrival-track" aria-hidden="true"><i/></div>
  </section>;

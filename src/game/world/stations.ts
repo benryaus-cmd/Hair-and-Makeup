@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import type { Builder } from '@/game/builder';
+import { translatedBuilder, type Builder } from '@/game/builder';
 import { PALETTE, gloss, glassMaterial, neonMaterial } from '@/game/palette';
 import { SPOTS } from '@/game/spots';
 import type { Spot } from '@/game/types';
@@ -254,7 +254,7 @@ export function buildStations(b: Builder): StationFx {
   surfShack(b, fx);
   netballCourt(b);
   volleyballCourt(b);
-  photoBooth(b, fx);
+  photoBooth(translatedBuilder(b,11,-1.6), fx);
   cafeKiosk(b, fx);
 
   for (const spot of SPOTS) beacon(b, spot, fx);

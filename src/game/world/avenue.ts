@@ -41,12 +41,12 @@ export function buildAvenue(b: Builder) {
   }
 
   // Runway with stage, pose targets and seating
-  b.box(9, 0.1, 26, gloss(0xd0184f, { roughness: 0.35, metalness: 0.2 }), -46, 0.08, 6);
+  b.box(9, 0.1, 26, gloss(0x211b2b, { roughness: 0.7, metalness: 0.02 }), -46, 0.08, 6);
   b.box(0.5, 0.12, 26, gold, -50.6, 0.12, 6);
   b.box(0.5, 0.12, 26, gold, -41.4, 0.12, 6);
   b.solid(11, 1, 8, white, -46, 0.5, 22);
   b.box(11.4, 0.3, 8.4, gold, -46, 1.05, 22);
-  b.box(11, 5.2, 0.5, gloss(PALETTE.pastelPink, { roughness: 0.24, metalness: 0.4 }), -46, 3.6, 26);
+  b.box(11, 5.2, 0.5, gloss(0xfff7ed, { roughness: 0.8, metalness: 0 }), -46, 3.6, 26);
   neonPanel(b, -46, 5.6, 25.7, 10, 0.5, PALETTE.magenta);
   for (let i = 0; i < 3; i += 1) {
     const ring = b.add(

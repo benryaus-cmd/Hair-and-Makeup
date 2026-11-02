@@ -4,6 +4,7 @@ import type { HairId, OutfitId } from '@/game/types';
 import type { Look, PoseId } from '@/game/lifestyle-types';
 import { RESIDENTS } from '@/game/resident-data';
 import { getPairLayout } from '@/game/poses';
+import { createPedestrianGait } from '@/game/character/pedestrian-gait';
 
 const HOMES = [
   { x: -2.8, y: .91, z: -25.8, pool: true },
@@ -127,17 +128,20 @@ export function createResidents(initialBudget=1) {
       make(pivot,skin,rounded,0,-.51,0,.049,.068,.032);
       return pivot;
     });
-    const legs: THREE.Group[] = [];
+    const legs: THREE.Group[] = [], knees: THREE.Group[] = [], ankles: THREE.Group[] = [];
     for (const side of [-1,1]) {
       const leg = new THREE.Group();leg.position.set(side*.107,.91,0);body.add(leg);
-      make(leg,skin,limb,0,-.4,0,male ? .076 : .061,.8,male ? .073 : .058);
+      make(leg,skin,limb,0,-.2125,0,male ? .076 : .061,.425,male ? .073 : .058);
+      const knee=new THREE.Group();knee.name='resident knee';knee.position.y=-.425;leg.add(knee);knees.push(knee);
+      make(knee,skin,rounded,0,0,0,male ? .074 : .059,.065,male ? .072 : .057);
+      make(knee,skin,limb,0,-.1985,0,male ? .071 : .057,.397,male ? .069 : .055);
+      const ankle=new THREE.Group();ankle.name='resident ankle';ankle.position.y=-.397;knee.add(ankle);ankles.push(ankle);
       if (male) {
         make(leg,shorts,limb,0,-.13,0,.107,.29,.10);
         const hem=make(leg,white,limb,0,-.272,0,.108,.017,.102);hem.name='Ken shorts hem';
         stitch(leg,white,[[side*.087,-.018,.047],[side*.098,-.13,.049],[side*.098,-.25,.049]],.003);
-        make(leg,skin,rounded,0,-.46,.009,.074,.081,.072);
       }
-      make(leg,white,rounded,0,-.83,.045,male ? .083 : .072,.045,male ? .145 : .13);
+      make(ankle,white,rounded,0,-.008,.045,male ? .083 : .072,.045,male ? .145 : .13);
       if (home.pool) leg.rotation.x = -1.25;
       legs.push(leg);
     }
@@ -162,9 +166,10 @@ export function createResidents(initialBudget=1) {
     group.traverse(object=>{object.castShadow=false;object.receiveShadow=false;});
     if (male) body.scale.set(1.05,1.08,1.05);
     group.position.set(home.x, home.y, home.z);
-    return {info,home,group,body,arms,legs,details,label,float,floatDecor,male,
+    const gait=createPedestrianGait();
+    return {info,home,group,body,arms,legs,knees,ankles,details,label,float,floatDecor,male,gait,gaitFrame:gait.update(0,0,false),travel:0,
       position:new THREE.Vector3(home.x,home.y,home.z), route:WALK_ROUTES[info.id],
-      waypoint:1, wait:0, heading:0, speed:0, stride:0, nearby:false};
+      waypoint:1, wait:0, heading:0, speed:0, nearby:false};
   });
   // Three reusable full doll rigs provide close-up detail without six expensive
   // characters updating offscreen. Everyone else retains the simple silhouette.
@@ -202,6 +207,7 @@ export function createResidents(initialBudget=1) {
       const distance=Math.hypot(person.position.x-player.x,person.position.z-player.z);
       person.nearby=distance<3.3 && Math.abs(person.position.y-player.y)<2;
       person.speed=0;
+      person.travel=0;
       // Keep the route cursor and its position while invited to talk or pose.
       // Removing the invitation resumes the same leg, without walking home.
       if (photoIds.includes(person.info.id)) continue;
@@ -217,7 +223,7 @@ export function createResidents(initialBudget=1) {
       const travel=Math.min(remaining,speed*step);
       if (remaining>.001 && step>0) {
         person.position.x+=dx/remaining*travel;person.position.z+=dz/remaining*travel;
-        person.speed=travel/step;person.stride+=travel*5.7;
+        person.speed=travel/step;person.travel=travel;
         const heading=Math.atan2(dx,dz);
         person.heading+=Math.atan2(Math.sin(heading-person.heading),Math.cos(heading-person.heading))*(1-Math.exp(-step*10));
       }
@@ -226,6 +232,9 @@ export function createResidents(initialBudget=1) {
         person.wait=1.2+(i%3)*.55;
       }
     }
+    // Advance each resident's gait once, including when its detail rig is
+    // borrowed by someone else. LOD changes retain the same travel phase.
+    for(const person of people)person.gaitFrame=person.gait.update(step,person.travel,person.speed>0);
     const ranked=people.filter(person => !person.male).sort((a,b)=> {
       const selectedA=photo && photoIds.includes(a.info.id), selectedB=photo && photoIds.includes(b.info.id);
       return Number(selectedB)-Number(selectedA) || Math.hypot(a.position.x-player.x,a.position.z-player.z)-Math.hypot(b.position.x-player.x,b.position.z-player.z);
@@ -254,7 +263,7 @@ export function createResidents(initialBudget=1) {
       slot.avatar.group.scale.x = paired && layout!.mirror ? -1 : 1;
       slot.avatar.group.position.set(0, person.home.pool && !chosen ? -.82 : 0, 0);
       slot.avatar.setPose(chosen ? (paired ? layout!.friendPose : photoPose) : person.nearby && !person.home.pool && (clock+index)%8<2.2 ? 'wave' : 'idle');
-      slot.avatar.update(dt, {moving:!chosen&&person.speed>0,speed:person.speed,grounded:true,dancing:false,sitting:person.home.pool&&!chosen});
+      slot.avatar.update(dt, {moving:!chosen&&person.speed>0,speed:person.speed,grounded:true,dancing:false,sitting:person.home.pool&&!chosen,locomotionFrame:!chosen&&person.speed>0?person.gaitFrame:undefined});
     }
     for (let i=0;i<people.length;i++) {
       const person=people[i], chosen=photo && photoIds.includes(person.info.id);
@@ -277,15 +286,24 @@ export function createResidents(initialBudget=1) {
       // A photo companion stands beside the doll even if normally floating.
       if(person.male) person.body.scale.x = paired && layout!.mirror ? -1.05 : 1.05;
       person.body.rotation.z=0;
-      person.body.position.y=chosen?0:home.pool?-.82:person.speed>0?Math.abs(Math.sin(person.stride))*.025:Math.sin(clock*1.5+i)*.012;
+      person.body.position.y=chosen?0:home.pool?-.82:person.speed>0?(person.gaitFrame.pelvisY-.935)*person.body.scale.y:Math.sin(clock*1.5+i)*.012;
       person.floatDecor.visible=!chosen;
-      person.legs.forEach((leg,index)=>{leg.scale.set(1,1,1);leg.rotation.set(home.pool&&!chosen?-1.25:!chosen&&person.speed>0?Math.sin(person.stride+index*Math.PI)*.4:0,0,0);});
+      person.legs.forEach((leg,index)=>{
+        leg.scale.set(1,1,1);leg.rotation.set(home.pool&&!chosen?-1.25:0,0,0);
+        person.knees[index].rotation.set(0,0,0);person.ankles[index].rotation.set(0,0,0);
+        if(!chosen&&person.speed>0){
+          const side=index?'right':'left';
+          leg.rotation.set(...person.gaitFrame.rotations[side+'UpperLeg']);
+          person.knees[index].rotation.set(...person.gaitFrame.rotations[side+'LowerLeg']);
+          person.ankles[index].rotation.set(...person.gaitFrame.rotations[side+'Foot']);
+        }
+      });
       if(home.pool && !chosen) {group.position.y+=Math.sin(clock*1.3+i)*.07;group.rotation.z=Math.sin(clock*.9+i)*.035;}
       else group.rotation.z=0;
       person.arms[0].rotation.z=.1+Math.sin(clock*1.6+i)*.04;
       person.arms[1].rotation.z=chosen?-.8:-.1-Math.sin(clock*1.6+i)*.04;
-      person.arms[0].rotation.x=!chosen&&person.speed>0?-Math.sin(person.stride)*.3:0;
-      person.arms[1].rotation.x=chosen?-1.2:home.pool?-.5:person.speed>0?Math.sin(person.stride)*.3:0;
+      person.arms[0].rotation.x=!chosen&&person.speed>0?person.gaitFrame.rotations.leftUpperArm[0]:0;
+      person.arms[1].rotation.x=chosen?-1.2:home.pool?-.5:person.speed>0?person.gaitFrame.rotations.rightUpperArm[0]:0;
       if (!chosen && !home.pool && person.nearby && (clock+i)%8<2.2) person.arms[1].rotation.set(-.6,0,-2.3-Math.sin(clock*4)*.12);
       if (person.male && chosen) {
         const selectedPose=paired ? layout!.friendPose : photoPose;

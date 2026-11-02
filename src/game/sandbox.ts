@@ -1,3 +1,5 @@
+import {createPedestrianGait} from '@/game/character/pedestrian-gait';
+import {runwayPerformance} from '@/game/studio/arrival';
 import {getPairLayout} from '@/game/poses';
 import { RIDING } from '@/game/character/riding';
 import * as THREE from 'three';
@@ -31,6 +33,7 @@ const SPAWN = { x: 7, y: 1.4, z: -13 };
 const VEHICLE_IDS: VehicleId[] = ['convertible', 'scooter', 'buggy'];
 
 export type SandboxApi = {
+  setRunwayIntro(progress:number|null):void;
   setPresentation(mode: PresentationMode): void;
   setLook(look: Look): void;
   setPose(pose: PoseId): void;
@@ -164,6 +167,9 @@ export function createSandbox(options: SandboxOptions): Sandbox {
   let presentationFacing = facing;
   let dancing = false;
   let presentation: PresentationMode = 'world';
+  let runwayProgress:number|null=null;
+  let runwayGait=createPedestrianGait();
+  let lastRunwayPosition:THREE.Vector3|null=null;
   let mounted: VehicleId | null = null;
   let lastSpot: string | null = '__none';
   let lastZone: ZoneId | null = null;
@@ -294,6 +300,18 @@ export function createSandbox(options: SandboxOptions): Sandbox {
 
   function update(step: number) {
     restoreCameraCutaway();
+    if(runwayProgress!==null) {
+      const show=runwayPerformance(runwayProgress);
+      const distance=lastRunwayPosition?show.position.distanceTo(lastRunwayPosition):0;
+      lastRunwayPosition=show.position.clone();
+      avatar.group.position.copy(show.position);avatar.group.rotation.set(0,show.yaw,0);
+      avatar.setPose(show.walking?'idle':show.pose);
+      avatar.update(step,{moving:show.walking,speed:step>0?distance/step:0,grounded:true,dancing:false,sitting:false,locomotionFrame:runwayGait.update(step,distance,show.walking)});
+      world.setMarkersVisible?.(false);tokens.group.visible=false;cards.group.visible=false;particles.points.visible=false;
+      world.update(step,options.tuning.effects&&options.tuning.quality!=='low');
+      residents.update(step,show.position,false,options.tuning.quality==='low'?1:3,show.yaw);
+      return;
+    }
     if (activityRunning) {activity.update(step);return;}
     const hasInput = Math.hypot(move.x, move.y) > .12 && presentation === 'world' && !dancing;
     const direction=steering.direction(hasInput?move.x:0,hasInput?move.y:0,cameraRig.getYaw());
@@ -466,6 +484,18 @@ export function createSandbox(options: SandboxOptions): Sandbox {
     root,
     update,
     api: {
+      setRunwayIntro(progress) {
+        if(progress===null) {
+          runwayProgress=null;lastRunwayPosition=null;avatar.setPose('idle');
+          avatar.group.position.set(physics.position.x,physics.position.y-FEET_OFFSET+.02,physics.position.z);
+          avatar.group.rotation.set(0,facing,0);cameraRig.reset();
+          world.setMarkersVisible?.(true);tokens.group.visible=true;cards.group.visible=true;
+        }else {
+          if(runwayProgress===null){runwayGait=createPedestrianGait();lastRunwayPosition=null;}
+          runwayProgress=Number.isFinite(progress)?THREE.MathUtils.clamp(progress,0,1):0;
+          move.x=0;move.y=0;jumpQueued=false;
+        }
+      },
       setLook(look) {avatar.setLook(look);},
       setPose(pose) {avatar.setPose(pose);},
       setActivity,

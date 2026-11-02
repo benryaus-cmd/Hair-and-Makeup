@@ -45,3 +45,10 @@ const matrixUpdate=scenery.updateMatrixWorld;let wholeWorldMatrixUpdates=0;scene
 box.update(1/60);box.update(1/60);assert.equal(wholeWorldMatrixUpdates,0,'static cutaway does not recompute the full world matrices each frame');
 box.api.setPresentation('world');assert.equal(wall.visible,true,'closing presentation immediately restores world walls');assert.equal(enclosingWall.visible,true);
 box.dispose();assert.equal(stageDisposals,1,'sandbox disposes owned activity stage');console.log('PASS camera follow, stationary orbit, invalid deltas, photo/reset framing, held-stick no drift (360 frames), invalid move, activity idempotence, parent effect order');
+
+const introCamera=new THREE.PerspectiveCamera(58,.6,.1,900),introBox=createSandbox({camera:introCamera,tuning:{walkSpeed:5.4,effects:false},emit:noop});
+const parked=position.clone();introBox.api.setRunwayIntro(.2);introBox.update(1/60);
+assert(Math.abs(avatar.group.position.x+46)<1e-6,'fashion intro stages the real doll on the avenue runway');assert(position.equals(parked),'runway intro never moves gameplay physics');
+introBox.api.setRunwayIntro(.7);introBox.update(1/60);assert(Math.abs(avatar.group.position.z-11.5)<1e-6,'intro ends the walk with a stationary editorial pose');
+introBox.api.setRunwayIntro(null);introBox.update(0);assert(Math.abs(avatar.group.position.x-position.x)<1e-6,'skip/end restores actual gameplay position');introBox.dispose();
+console.log('PASS actual runway staging, preserved physics and skip/end restoration');

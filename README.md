@@ -6,8 +6,10 @@ This project copies the source of `benryaus-cmd/barbie` at `71a9680c4b55a40e863c
 
 ## This version
 
-- Genuine scene/shader loading, followed by a skippable in-world arrival. No image title screen.
-- Shared soft toon lighting that retains clothing prints, dye, metallic finishes and glitter; directional hair highlights and selective outlines.
+- Genuine scene/shader loading, followed by a skippable fashion-show walk and editorial pose on the catwalk. No image title screen.
+- Black silhouette outlines on animated dolls, clothes and nearby architecture, plus stronger toon shading that retains prints, dye, metallic finishes and glitter.
+- Travel-driven NPC walking with knee bend, planted steps and heel/toe articulation.
+- Black-and-ivory runway, front-row seating, lighting, fashion displays and a clear catwalk.
 - Procedural ocean, shoreline foam, sun glints, palm wind, planted arrival plaza and upgraded salon/boutique architecture.
 - Compact portrait HUD, camera/feed action, secondary tool shelf, scrollable styling panels and 44px minimum controls.
 - Holographic collectible displays, rarity rewards, collection milestones, clue album and discovery presentation.

@@ -6,6 +6,7 @@ import { buildAvenue } from '@/game/world/avenue';
 import { buildBeach } from '@/game/world/beach';
 import { buildDreamhouse, type DreamhouseMood } from '@/game/world/dreamhouse';
 import { buildStations, type Bobber } from '@/game/world/stations';
+import { buildFashionRunway } from '@/game/world/runway';
 import { buildCreatorPlaza } from '@/game/world/plaza';
 import { buildStudioArchitecture } from '@/game/world/architecture';
 import { createWorldAmbience } from '@/game/world/ambience';
@@ -97,6 +98,7 @@ export function buildWorld(): World {
   buildCreatorPlaza(builder);
   const mood = buildDreamhouse(builder);
   buildAvenue(builder);
+  buildFashionRunway(builder);
   buildBeach(builder);
   buildSalon(builder);
   buildStudioArchitecture(builder);

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { studioMaterial, addHeroContours } from '@/game/studio/materials';
+import { createInkOutlines } from '@/game/studio/ink';
+import { studioMaterial } from '@/game/studio/materials';
 import { arrivalShot, ARRIVAL_SECONDS } from '@/game/studio/arrival';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { createLoop } from '@/core/loop';
@@ -153,7 +154,7 @@ export function createGame(
 
   let disposed = false;
   let shaderFailed = false;
-  let contours:ReturnType<typeof addHeroContours>|undefined;
+  let contours:ReturnType<typeof createInkOutlines>|undefined;
   let arrival: {elapsed:number}|null = null;
   view.renderer.debug.onShaderError = (gl, program) => {
     shaderFailed=true;
@@ -168,7 +169,7 @@ export function createGame(
     pmrem = new THREE.PMREMGenerator(view.renderer);
     environment = pmrem.fromScene(room, .04);
     scene.environment = environment.texture;
-    scene.environmentIntensity = .48;
+    scene.environmentIntensity = .32;
   } catch {
     view.dispose();
     onError('Your studio could not prepare its lighting. Try lighter graphics.');
@@ -178,8 +179,8 @@ export function createGame(
     pmrem?.dispose();
   }
 
-  scene.add(new THREE.HemisphereLight(0xe6edff, 0xb898a2, 1.7));
-  const sun = new THREE.DirectionalLight(0xffdfb9, 2.4);
+  scene.add(new THREE.HemisphereLight(0xe6edff, 0x6e596f, .98));
+  const sun = new THREE.DirectionalLight(0xffe5cf, 2.7);
   sun.position.set(-25, 18, -12);
   // One bounded shadow map follows the doll; only the character casts into it.
   sun.castShadow = true;
@@ -190,7 +191,7 @@ export function createGame(
   sun.shadow.radius = 3;
   scene.add(sun.target);
   scene.add(sun);
-  const fill = new THREE.DirectionalLight(0xd3ddff, .9);
+  const fill = new THREE.DirectionalLight(0xcbd8f4, .38);
   fill.position.set(-32, 22, -28);
   scene.add(fill);
 
@@ -207,7 +208,7 @@ export function createGame(
     view.renderer.shadowMap.enabled = clean.quality !== 'low';
     sun.castShadow = clean.quality !== 'low';
     cameraSensitivity = clean.cameraSensitivity;
-    contours?.setQuality(clean.quality==='low');
+
   }
   applyConfig(config);
 
@@ -222,6 +223,7 @@ export function createGame(
   }
   scene.add(sandbox.root);
   try {
+  sandbox.update(0);
   const styled=new Set<THREE.MeshStandardMaterial>();
   sandbox.root.traverse(node=>{
     if(!(node instanceof THREE.Mesh))return;
@@ -230,12 +232,12 @@ export function createGame(
       styled.add(material);studioMaterial(material,/hair/i.test(material.name)?'hair':'world');
     }
   });
-  const hero=sandbox.root.getObjectByName('doll');
-  if(hero){contours=addHeroContours(hero);contours.setQuality(safe.quality==='low');}
+  contours=createInkOutlines(sandbox.root,camera);
   sandbox.update(0);
   onBoot?.({phase:'shaders',progress:.65,label:'Preparing light, fabric & reflections'});
 
   } catch {
+    contours?.dispose();
     sandbox.dispose();
     releaseRunRoot(sandbox.root,new Set());
     sun.shadow.dispose();
@@ -254,19 +256,24 @@ export function createGame(
       },
     },
     update(step) {
-      sandbox.update(step);
       if(arrival && doll) {
         arrival.elapsed+=step;
-        const shot=arrivalShot(arrival.elapsed,doll.position,camera.position);
-        camera.position.copy(shot.position);camera.lookAt(shot.target);
-        if(arrival.elapsed>=ARRIVAL_SECONDS)arrival=null;
-      }
+        if(arrival.elapsed>=ARRIVAL_SECONDS){arrival=null;sandbox.api.setRunwayIntro(null);sandbox.update(step);}
+        else {
+          sandbox.api.setRunwayIntro(arrival.elapsed/ARRIVAL_SECONDS);
+          sandbox.update(step);
+          const shot=arrivalShot(arrival.elapsed,doll.position,camera.position);
+          camera.position.copy(shot.position);camera.lookAt(shot.target);
+        }
+      }else sandbox.update(step);
     },
     render() {
       if (doll) {
         sun.target.position.copy(doll.position);
         sun.position.copy(doll.position).add(sunOffset);
       }
+      const size=view.renderer.getSize(new THREE.Vector2());
+      contours?.update(tuning.quality==='low',size.x,size.y);
       view.renderer.render(scene, camera);
     },
   });
@@ -383,9 +390,10 @@ export function createGame(
       if(disposed)return;
       clearInput();
       arrival=skip?null:{elapsed:0};
+      sandbox.api.setRunwayIntro(skip?null:0);
       if(skip)sandbox.update(0);
     },
-    finishArrival() {if(!disposed){arrival=null;sandbox.update(0);}},
+    finishArrival() {if(!disposed){arrival=null;sandbox.api.setRunwayIntro(null);sandbox.update(0);}},
     pause() {
       if (!disposed) {
         paused = true;
@@ -413,6 +421,7 @@ export function createGame(
       disposed = true;
       loop.dispose();
       app.dispose();
+      contours?.dispose();
       sandbox.dispose();
       scene.remove(sandbox.root);
       sun.shadow.dispose();
@@ -427,6 +436,7 @@ export function createGame(
       if (disposed) return;
       clearInput();
       sandbox.api.setPresentation(mode);
+      contours?.refresh();
     },
     setLook(look) {if (!disposed) sandbox.api.setLook(look);},
     setPose(pose) {if (!disposed) sandbox.api.setPose(pose);},

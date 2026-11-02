@@ -208,3 +208,15 @@
 .card-art-placeholder>span { font-size:7px; letter-spacing:.22em; text-transform:uppercase; }
 .card-art-placeholder>strong { font:italic 400 24px/1.15 Georgia,serif; color:#86617a; }
 @media(max-height:680px) { .discovery-art { height:29dvh; } }
+
+/* Fashion-show framing: the moving model gets the centre of the frame. */
+.studio-arrival { background:linear-gradient(#17121d8c 0%,transparent 17%,transparent 65%,#17121dd0 100%); }
+.arrival-top { top:max(20px,env(safe-area-inset-top));font-size:9px; }
+.arrival-copy { bottom:100px;left:24px;right:24px; }
+.arrival-copy h1 { font-size:clamp(37px,11vw,56px);line-height:.95;margin:9px 0; }
+.arrival-copy p { margin:8px 0 0;font-size:10px; }
+.arrival-copy .studio-eyebrow { font-size:8px; }
+.studio-arrival::after { content:"";position:absolute;inset:0;background:#17121d;pointer-events:none;opacity:0;animation:runway-cut 7s linear both; }
+.arrival-skip { z-index:1;border:2px solid #17121d;color:#17121d; }
+@keyframes runway-cut { 0%,93%{opacity:0} 98%,100%{opacity:1} }
+.reduce-motion .studio-arrival::after { animation:none; }
