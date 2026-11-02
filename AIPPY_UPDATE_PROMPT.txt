@@ -22,20 +22,20 @@ Mount the genuine updated game directly in src/. Do not recreate it from a descr
   "enabled": true,
   "mode": "manifest",
   "repository": "benryaus-cmd/Hair-and-Makeup",
-  "manifestUrl": "https://raw.githubusercontent.com/benryaus-cmd/Hair-and-Makeup/10677e4d1648bf0b4f696da6da2ac5b8bc0dd739/aippy-import-manifest.json",
-  "manifestSha256": "3c0178324cfa7f0d00aa95a173d9bcc7fe74eabc5ba1eb4c2a3f04d3123268d8",
-  "sourceCommit": "c92d40cc285e2f54d549932358443f7dcf329ced",
-  "requestId": "hair-makeup-studio-v1-c92d40cc285e"
+  "manifestUrl": "https://raw.githubusercontent.com/benryaus-cmd/Hair-and-Makeup/8084bbec1c9a84cf16a7ef34aae0f214c8253162/aippy-import-manifest.json",
+  "manifestSha256": "2dfb8dcda062232eb8eb362d550e91cb217819e427bd2812611834579b5766d0",
+  "sourceCommit": "bac15dcf2e7422dce80ff6e26bb6e4217f72de67",
+  "requestId": "hair-makeup-studio-v1-bac15dcf2e74"
 }
-5. Run the real build. It will fetch the checksum-verified manifest and write 110 game files into their exact src/public destinations. It merges 10 asset keys while preserving unrelated host assets and its existing assets.ts wrapper. The updated App.tsx is the game entry; keep the existing main.tsx mounting it once. If src/ui/StartScreen.tsx remains from an older version, delete that retired component after fetching the new App; it is no longer used and its image must not be preloaded.
+5. Run the real build. It will fetch the checksum-verified manifest and write 113 game files into their exact src/public destinations. It merges 10 asset keys while preserving unrelated host assets and its existing assets.ts wrapper. The updated App.tsx is the game entry; keep the existing main.tsx mounting it once. If src/ui/StartScreen.tsx remains from an older version, delete that retired component after fetching the new App; it is no longer used and its image must not be preloaded.
 6. Keep the current hidden file viewer if present. If its file filter excludes every name containing 'token', narrow that to credential-token filenames: src/game/tokens.ts is gameplay source and must remain in the project.
 7. Run lint/typecheck and production build; fix integration errors in the actual working files. Do not create optimised copies. Confirm that the loader advances from actual scene readiness into the skippable in-world arrival, then gameplay. Verify wardrobe/makeup, camera/feed, album and controls. A generated manifest/config alone is not proof that source recovery ran: inspect the completion receipt and the fetched file count.
 
-SOURCE COMMIT: c92d40cc285e2f54d549932358443f7dcf329ced
-MANIFEST URL: https://raw.githubusercontent.com/benryaus-cmd/Hair-and-Makeup/10677e4d1648bf0b4f696da6da2ac5b8bc0dd739/aippy-import-manifest.json
-MANIFEST SHA-256: 3c0178324cfa7f0d00aa95a173d9bcc7fe74eabc5ba1eb4c2a3f04d3123268d8
-EXPECTED GAME FILES: 110
-REQUEST ID: hair-makeup-studio-v1-c92d40cc285e
+SOURCE COMMIT: bac15dcf2e7422dce80ff6e26bb6e4217f72de67
+MANIFEST URL: https://raw.githubusercontent.com/benryaus-cmd/Hair-and-Makeup/8084bbec1c9a84cf16a7ef34aae0f214c8253162/aippy-import-manifest.json
+MANIFEST SHA-256: 2dfb8dcda062232eb8eb362d550e91cb217819e427bd2812611834579b5766d0
+EXPECTED GAME FILES: 113
+REQUEST ID: hair-makeup-studio-v1-bac15dcf2e74
 
 COMPLETE vite-plugin-github-import.ts:
 ```typescript

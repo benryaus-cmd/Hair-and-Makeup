@@ -2,9 +2,9 @@
 
 The current prepared prompt is `AIPPY_UPDATE_PROMPT.txt`; release identities are in `docs/import-release.json`.
 
-- Source snapshot: `c92d40cc285e2f54d549932358443f7dcf329ced`
-- Manifest snapshot: `10677e4d1648bf0b4f696da6da2ac5b8bc0dd739`
-- Game files: 110
+- Source snapshot: `bac15dcf2e7422dce80ff6e26bb6e4217f72de67`
+- Manifest snapshot: `8084bbec1c9a84cf16a7ef34aae0f214c8253162`
+- Game files: 113
 - Asset keys: 10
 
 The Node-only Vite importer verifies immutable URLs, SHA-256 and file sizes, stages downloads before promotion and rolls back failures. It preserves the host entry, developer utilities and unrelated assets. Ordinary repository builds keep `github-import.config.json` disabled.
