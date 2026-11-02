@@ -41,6 +41,10 @@ const TEXT_EXTENSIONS = new Set([
 
 const SKIP_DIRS = new Set([
   'node_modules',
+  '.test-output',
+  '.github-import-state',
+  '.github-import-staging',
+  '.superpowers',
   '.git',
   '.github',
   'dist',
