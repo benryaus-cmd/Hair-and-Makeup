@@ -29,3 +29,10 @@ Studied publicly delivered client code from Gym Rat Rumble, Saiyan Hero, Mecha B
 ## Limits
 
 Browser testing used Chromium software rendering with portrait touch emulation. It is not an Android/iOS hardware frame-rate or battery benchmark. Optional image/music hosts remain external. Music may require the first user gesture because of browser autoplay rules. This release improves an existing game rather than replacing its content/progression with a new backend.
+
+
+## Published source delivery
+
+Verified source snapshot: `c92d40cc285e2f54d549932358443f7dcf329ced`. Delivery manifest covers 110 game files and 10 asset keys. `AIPPY_UPDATE_PROMPT.txt` and `docs/import-release.json` contain the exact immutable manifest URL and checksum. The original Barbie repository remains unchanged.
+
+The project viewer now excludes diagnostic/publication copies from its embedded file list, avoiding accidental build-size inflation. The clean production bundle is about 7.83 MB before gzip (2.64 MB gzip), excluding external image/audio media. A regression test confirms gameplay tokens remain visible while diagnostic directories are omitted.

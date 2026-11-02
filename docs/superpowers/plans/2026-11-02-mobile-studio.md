@@ -41,5 +41,5 @@
 
 ### Task 4: Review and publication
 - [x] Independent whole-change review; address important issues.
-- [ ] Regenerate import manifest, commit and publish new repo without altering source repo.
+- [x] Regenerate import manifest, commit and publish new repo without altering source repo.
 - [x] Document what changed, checks passed and any device limitations.

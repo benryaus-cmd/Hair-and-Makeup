@@ -1,20 +1,9 @@
 {
-  "sourceCommit": "16a90ea658836bbb08886635f9f61a99da080a09",
-  "manifestCommit": "95f8a722906c722aa525a11c924d7a9fa4b1da5d",
-  "manifestUrl": "https://raw.githubusercontent.com/benryaus-cmd/barbie/95f8a722906c722aa525a11c924d7a9fa4b1da5d/aippy-import-manifest.json",
-  "manifestSha256": "3cbb8aaa5c0414fcc793fe5f381be8f06c1869e71fc177634f8a7c20539bf0d6",
-  "requestId": "barbie-studio-16a90ea-v7",
-  "gameFiles": 103,
-  "assetKeys": [
-    "dreamland_pop_music",
-    "collector_card_art_1",
-    "collector_card_art_2",
-    "collector_card_art_3",
-    "collector_card_art_4",
-    "collector_card_art_5",
-    "collector_card_art_6",
-    "collector_card_art_7",
-    "collector_card_art_8",
-    "title_screen_barbie_art"
-  ]
+  "repository": "benryaus-cmd/Hair-and-Makeup",
+  "sourceCommit": "c92d40cc285e2f54d549932358443f7dcf329ced",
+  "manifestCommit": "10677e4d1648bf0b4f696da6da2ac5b8bc0dd739",
+  "manifestUrl": "https://raw.githubusercontent.com/benryaus-cmd/Hair-and-Makeup/10677e4d1648bf0b4f696da6da2ac5b8bc0dd739/aippy-import-manifest.json",
+  "manifestSha256": "3c0178324cfa7f0d00aa95a173d9bcc7fe74eabc5ba1eb4c2a3f04d3123268d8",
+  "requestId": "hair-makeup-studio-v1-c92d40cc285e",
+  "files": 110
 }

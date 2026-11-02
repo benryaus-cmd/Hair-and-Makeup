@@ -1,13 +1,14 @@
-# Direct Aippy source update
+# Hair & Makeup source delivery
 
-`vite-plugin-github-import.ts` is Node-only and registered first in Vite. It does nothing on serve or when `enabled:false`. Active manifest mode verifies immutable URLs, manifest SHA-256, file byte sizes/hashes, safe destinations and declared runtime dependency floors before touching game files. It merges explicit asset keys while preserving unrelated host assets, preserves an existing assets.ts wrapper, stages all concurrent downloads, promotes with backups and rollback, and writes a completion receipt only after verification.
+The current prepared prompt is `AIPPY_UPDATE_PROMPT.txt`; release identities are in `docs/import-release.json`.
 
-`github-import.config.json` starts inactive. A prepared update needs mode:manifest, enabled:true, repository:benryaus-cmd/Hair-and-Makeup, exact manifestUrl/manifestSha256/sourceCommit and a fresh requestId. Reusing the same completed request skips all requests and preserves later local source edits. Root config, main.tsx, developer viewer files, src/dev and src/types do not arrive through the game manifest. SettingsModal.tsx is explicitly updated because it now contains real graphics/sound/About controls and the original hidden title-tap/password handlers.
+- Source snapshot: `c92d40cc285e2f54d549932358443f7dcf329ced`
+- Manifest snapshot: `10677e4d1648bf0b4f696da6da2ac5b8bc0dd739`
+- Game files: 110
+- Asset keys: 10
 
-Generate a manifest with `node scripts/make-manifest.mjs EXACT_PUBLISHED_SOURCE_COMMIT`. Commit that manifest separately. All game-file URLs inside point to the source commit, never the moving branch; the manifest itself then has its own immutable commit URL. The generated prompt supplies both identities. No recursive tree mode, required main.tsx rule, upstream folder, iframe or second React root is needed.
+The Node-only Vite importer verifies immutable URLs, SHA-256 and file sizes, stages downloads before promotion and rolls back failures. It preserves the host entry, developer utilities and unrelated assets. Ordinary repository builds keep `github-import.config.json` disabled.
 
-For an Aippy project that already has an importer, modify/reuse that single importer. The complete prepared prompt contains a tested manifest-mode implementation for a project missing it or for replacing its legacy download logic, while preserving the rest of Vite/Aippy tooling.
+The source and manifest use different commits intentionally: game URLs pin the verified source snapshot, and the separate manifest commit makes the manifest itself immutable. A completed request is idempotent and preserves later Aippy source edits.
 
-The original ZIP omitted gameplay tokens.ts because its hidden file-manifest plugin filtered every filename containing `token`. The project copy narrows that rule to credential token filenames. In the host, make this same one-line filter correction without replacing its developer utilities.
-
-Verification: `npm test` includes a local network-mocked importer transaction test. An actual Aippy build and receipt must still be checked after pasting the activation prompt; configuring an importer is not proof the destination imported successfully.
+After Aippy runs the prompt, its actual build and receipt must still be inspected. Publishing this repository does not update a separate Aippy project automatically.

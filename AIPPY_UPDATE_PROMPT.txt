@@ -1,69 +1,229 @@
-APPLY BARBIE FASHION STUDIO 7 — SOURCE 16a90ea — 103 GAME FILES
+BUILD HAIR & MAKEUP — THE STUDIO IN THIS CURRENT PROJECT
 
-Use Node at Vite BUILD TIME to apply this verified, pinned source update directly to the EXISTING project paths. This is a local importer config edit followed by the normal Vite build. Node performs the HTTP requests, verification, staging and direct source writes DURING THAT BUILD. Do not ask the conversational model to retrieve or transcribe remote files, and do not recreate the already-finished gameplay.
+This is an application-build specification. Create or update the source and Vite configuration below. The Node runtime performs the remote requests and filesystem work at BUILD TIME; this does not require conversational browsing. Use the project's existing supported Node runtime; do not pin a new Node version.
 
-REUSE the EXISTING vite-plugin-github-import.ts registered FIRST in Vite and github-import.config.json from the previous successful Barbie update. ONE importer, ONE live source tree, ONE React root and renderer. No upstream/importedGame directory, adapter, iframe or second game tree.
+Mount the genuine updated game directly in src/. Do not recreate it from a description, put it in an iframe, make an upstream copy, create a second React root, or retain the old Barbie image start screen.
 
-Set the EXISTING github-import.config.json to this active request (keep unrelated legacy fields only if needed):
-
-```json
+1. Inspect the current Vite setup, package.json, root component and any existing manifest importer. Preserve Aippy's required plugins and the host's src/main.tsx. Preserve existing hidden developer/file-viewer utilities.
+2. Ensure these runtime dependencies are present at the versions/ranges below. Keep unrelated dependencies.
+{
+  "@aippy/runtime": "^0.4.1",
+  "@dimforge/rapier3d": "0.21.0",
+  "fflate": "^0.8.2",
+  "lucide-react": "^1.34.0",
+  "react": "^19.2.8",
+  "react-dom": "^19.2.8",
+  "three": "0.186.1",
+  "tone": "^15.1.22"
+}
+3. Create/replace vite-plugin-github-import.ts with the complete build-time pipeline below. If the project already registers this importer, update that single registration; otherwise import githubImportPlugin from './vite-plugin-github-import' and register githubImportPlugin() FIRST in the existing Vite plugins array. Do not remove the React, Tailwind, Aippy or file-viewer plugins. The importer is Node-only and must never be imported by browser source.
+4. Write github-import.config.json exactly as follows:
 {
   "enabled": true,
   "mode": "manifest",
-  "repository": "benryaus-cmd/barbie",
-  "branch": "main",
-  "manifestUrl": "https://raw.githubusercontent.com/benryaus-cmd/barbie/95f8a722906c722aa525a11c924d7a9fa4b1da5d/aippy-import-manifest.json",
-  "manifestSha256": "3cbb8aaa5c0414fcc793fe5f381be8f06c1869e71fc177634f8a7c20539bf0d6",
-  "sourceCommit": "16a90ea658836bbb08886635f9f61a99da080a09",
-  "requestId": "barbie-studio-16a90ea-v7"
+  "repository": "benryaus-cmd/Hair-and-Makeup",
+  "manifestUrl": "https://raw.githubusercontent.com/benryaus-cmd/Hair-and-Makeup/10677e4d1648bf0b4f696da6da2ac5b8bc0dd739/aippy-import-manifest.json",
+  "manifestSha256": "3c0178324cfa7f0d00aa95a173d9bcc7fe74eabc5ba1eb4c2a3f04d3123268d8",
+  "sourceCommit": "c92d40cc285e2f54d549932358443f7dcf329ced",
+  "requestId": "hair-makeup-studio-v1-c92d40cc285e"
 }
+5. Run the real build. It will fetch the checksum-verified manifest and write 110 game files into their exact src/public destinations. It merges 10 asset keys while preserving unrelated host assets and its existing assets.ts wrapper. The updated App.tsx is the game entry; keep the existing main.tsx mounting it once. If src/ui/StartScreen.tsx remains from an older version, delete that retired component after fetching the new App; it is no longer used and its image must not be preloaded.
+6. Keep the current hidden file viewer if present. If its file filter excludes every name containing 'token', narrow that to credential-token filenames: src/game/tokens.ts is gameplay source and must remain in the project.
+7. Run lint/typecheck and production build; fix integration errors in the actual working files. Do not create optimised copies. Confirm that the loader advances from actual scene readiness into the skippable in-world arrival, then gameplay. Verify wardrobe/makeup, camera/feed, album and controls. A generated manifest/config alone is not proof that source recovery ran: inspect the completion receipt and the fetched file count.
+
+SOURCE COMMIT: c92d40cc285e2f54d549932358443f7dcf329ced
+MANIFEST URL: https://raw.githubusercontent.com/benryaus-cmd/Hair-and-Makeup/10677e4d1648bf0b4f696da6da2ac5b8bc0dd739/aippy-import-manifest.json
+MANIFEST SHA-256: 3c0178324cfa7f0d00aa95a173d9bcc7fe74eabc5ba1eb4c2a3f04d3123268d8
+EXPECTED GAME FILES: 110
+REQUEST ID: hair-makeup-studio-v1-c92d40cc285e
+
+COMPLETE vite-plugin-github-import.ts:
+```typescript
+import type { Plugin } from 'vite';
+import * as fs from 'node:fs/promises';
+import path from 'node:path';
+import { createHash } from 'node:crypto';
+
+type Entry = { destination: string; url: string; size: number; sha256: string };
+type Update = Entry & { strategy: string; keys?: string[] };
+type Manifest = { schemaVersion: number; repository: string; sourceCommit: string; files: Entry[]; assetConfigUpdate?: Update; assetConfigWrapper?: Update; requiredDependencies?: Record<string,string>; obsoleteGameFiles?: string[] };
+const sha256 = (data: Uint8Array) => createHash('sha256').update(data).digest('hex');
+const protectedPath = (p: string) => p === 'src/main.tsx' || p.startsWith('src/dev/') || p.startsWith('src/types/') || /^src\/components\/(ProjectFileViewer|ProjectFilePreview|DevUnlockOverlay)\./.test(p);
+
+async function download(url: string): Promise<Buffer> {
+  let cause: unknown;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 25000);
+    try {
+      const response = await fetch(url, { signal: controller.signal, redirect: 'error' });
+      if (!response.ok) {
+        const error = new Error(`${url}: HTTP ${response.status}; remaining requests ${response.headers.get('x-ratelimit-remaining') ?? 'unknown'}`);
+        if (response.status !== 429 && response.status < 500) throw Object.assign(error, { permanent: true });
+        throw error;
+      }
+      return Buffer.from(await response.arrayBuffer());
+    } catch (error) {
+      cause = error;
+      if ((error as { permanent?: boolean }).permanent) break;
+      if (attempt < 2) await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
+    } finally { clearTimeout(timer); }
+  }
+  throw new Error(`GitHub import download failed: ${url}`, { cause });
+}
+
+export function githubImportPlugin(): Plugin {
+  return {
+    name: 'dreamland-manifest-import', enforce: 'pre',
+    async config(viteConfig, env) {
+      if (env.command !== 'build') return;
+      const root = path.resolve(viteConfig.root || process.cwd());
+      const configPath = path.join(root, 'github-import.config.json');
+      let config: { enabled?: boolean; mode?: string; repository?: string; manifestUrl?: string; manifestSha256?: string; sourceCommit?: string; requestId?: string };
+      try { config = JSON.parse(await fs.readFile(configPath, 'utf8')); }
+      catch (error) {
+        if ((error as NodeJS.ErrnoException).code === 'ENOENT') return;
+        throw new Error('Cannot read github-import.config.json', { cause: error });
+      }
+      if (!config.enabled) return;
+      const { repository, manifestUrl, manifestSha256, sourceCommit, requestId } = config;
+      if (config.mode !== 'manifest' || repository !== 'benryaus-cmd/Hair-and-Makeup' || !requestId || !/^[a-f0-9]{40}$/.test(sourceCommit || '') || !/^[a-f0-9]{64}$/.test(manifestSha256 || '')) throw new Error('Active importer requires manifest mode, exact Hair-and-Makeup repository, requestId, sourceCommit and manifestSha256.');
+      const manifestPattern = /^https:\/\/raw\.githubusercontent\.com\/benryaus-cmd\/Hair-and-Makeup\/[a-f0-9]{40}\/aippy-import-manifest\.json$/;
+      if (!manifestPattern.test(manifestUrl || '')) throw new Error('Manifest URL must use an immutable commit on the Hair-and-Makeup repository.');
+      const stateDir = path.join(root, '.github-import-state');
+      const receiptPath = path.join(stateDir, 'receipt.json');
+      let receipt: { requestId?: string; manifestSha256?: string } | null = null;
+      try { receipt = JSON.parse(await fs.readFile(receiptPath, 'utf8')); }
+      catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw new Error('Unreadable import receipt; refusing to overwrite it.', { cause: error }); }
+      if (receipt?.requestId === requestId) {
+        if (receipt.manifestSha256 !== manifestSha256) throw new Error('A completed requestId cannot be reused for a different manifest.');
+        console.log(`[github-import] ${requestId} already completed; preserving local edits.`);
+        return;
+      }
+      const bytes = await download(manifestUrl!);
+      if (sha256(bytes) !== manifestSha256) throw new Error('Manifest SHA-256 mismatch; no local files changed.');
+      const manifest: Manifest = JSON.parse(bytes.toString('utf8'));
+      if (manifest.schemaVersion !== 1 || manifest.repository !== repository || manifest.sourceCommit !== sourceCommit || !Array.isArray(manifest.files) || !manifest.files.length) throw new Error('Manifest identity/schema mismatch.');
+      if (manifest.obsoleteGameFiles?.length) throw new Error('This import contains obsolete paths; review deletions explicitly before enabling them.');
+      const safePath = async (relative: string) => {
+        if (typeof relative !== 'string' || !/^(src|public)\//.test(relative) || /[\\\0]/.test(relative) || relative.split('/').some(p => !p || p === '.' || p === '..') || protectedPath(relative)) throw new Error(`Protected or unsafe destination: ${relative}`);
+        const full = path.resolve(root, relative);
+        if (!full.startsWith(root + path.sep)) throw new Error(`Destination escapes root: ${relative}`);
+        let current = root;
+        for (const part of relative.split('/')) {
+          current = path.join(current, part);
+          try { if ((await fs.lstat(current)).isSymbolicLink()) throw new Error(`Symlink destination rejected: ${relative}`); }
+          catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
+        }
+        return full;
+      };
+      const extras = [manifest.assetConfigUpdate, manifest.assetConfigWrapper].filter(Boolean) as Update[];
+      const entries = [...manifest.files, ...extras];
+      const seen = new Set<string>();
+      for (const entry of entries) {
+        await safePath(entry.destination);
+        if (seen.has(entry.destination)) throw new Error(`Duplicate import path: ${entry.destination}`);
+        seen.add(entry.destination);
+        if (!Number.isSafeInteger(entry.size) || entry.size < 0 || !/^[a-f0-9]{64}$/.test(entry.sha256)) throw new Error(`Bad file metadata: ${entry.destination}`);
+        const expected = `https://raw.githubusercontent.com/${repository}/${sourceCommit}/${entry.destination}`;
+        if (entry.url !== expected) throw new Error(`File URL is not pinned to source commit: ${entry.destination}`);
+        if (entry.destination.startsWith('src/config/assets.') && !extras.includes(entry as Update)) throw new Error('Asset registry must use the explicit merge/create strategy.');
+      }
+      const localPackage = JSON.parse(await fs.readFile(path.join(root, 'package.json'), 'utf8'));
+      const missing = Object.entries(manifest.requiredDependencies || {}).filter(([name, required]) => {
+        const declared = localPackage.dependencies?.[name] || localPackage.devDependencies?.[name];
+        if (typeof declared !== 'string') return true;
+        if (declared === required || declared === '*') return false;
+        const have = declared.match(/(\d+)\.(\d+)\.(\d+)/);
+        const need = required.match(/(\d+)\.(\d+)\.(\d+)/);
+        if (!have || !need) return true;
+        const a = have.slice(1).map(Number), b = need.slice(1).map(Number);
+        // Conservative: never silently accept a breaking major/minor (for 0.x) upgrade.
+        if (a[0] !== b[0] || (b[0] === 0 && a[1] !== b[1])) return true;
+        return a[1] < b[1] || (a[1] === b[1] && a[2] < b[2]);
+      });
+      if (missing.length) throw new Error(`Before building, add these dependencies through the host package manager: ${missing.map(([n,v]) => `${n}@${v}`).join(', ')}`);
+      const stage = path.join(root, '.github-import-staging');
+      await fs.rm(stage, { recursive: true, force: true });
+      await fs.mkdir(stage, { recursive: true });
+      const verified = new Map<string, Buffer>();
+      let cursor = 0;
+      let downloadFailure: unknown;
+      const worker = async () => {
+        while (cursor < entries.length && !downloadFailure) {
+          const entry = entries[cursor++];
+          try {
+            const data = await download(entry.url);
+            if (data.length !== entry.size || sha256(data) !== entry.sha256) throw new Error(`Size/hash mismatch: ${entry.destination}`);
+            const staged = path.join(stage, entry.destination);
+            await fs.mkdir(path.dirname(staged), { recursive: true });
+            await fs.writeFile(staged, data);
+            verified.set(entry.destination, data);
+          } catch (error) { downloadFailure = error; }
+        }
+      };
+      await Promise.allSettled(Array.from({ length: Math.min(4, entries.length) }, worker));
+      if (downloadFailure) { await fs.rm(stage, { recursive: true, force: true }); throw new Error('Import staging failed; all workers stopped and no live files changed.', { cause: downloadFailure }); }
+      const output = new Map<string, Buffer>(manifest.files.map(e => [e.destination, verified.get(e.destination)!]));
+      const update = manifest.assetConfigUpdate;
+      if (update) {
+        if (update.destination !== 'src/config/assets.json' || update.strategy !== 'merge-json-object' || !Array.isArray(update.keys)) throw new Error('Invalid asset merge strategy.');
+        const source = JSON.parse(verified.get(update.destination)!.toString('utf8'));
+        let local: Record<string, unknown> = {};
+        try { local = JSON.parse(await fs.readFile(path.join(root, update.destination), 'utf8')); }
+        catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw new Error('Local assets.json is invalid; no promotion attempted.', { cause: error }); }
+        if (!local || Array.isArray(local) || typeof local !== 'object') throw new Error('Local assets.json must be an object.');
+        for (const key of update.keys) {
+          if (['__proto__', 'prototype', 'constructor'].includes(key) || typeof source[key] !== 'string') throw new Error(`Invalid asset key: ${key}`);
+          local[key] = source[key];
+        }
+        output.set(update.destination, Buffer.from(JSON.stringify(local, null, 2) + '\n'));
+      }
+      const wrapper = manifest.assetConfigWrapper;
+      if (wrapper) {
+        if (wrapper.destination !== 'src/config/assets.ts' || wrapper.strategy !== 'create-if-missing') throw new Error('Invalid asset wrapper strategy.');
+        try { await fs.access(path.join(root, wrapper.destination)); }
+        catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; output.set(wrapper.destination, verified.get(wrapper.destination)!); }
+      }
+      const backups = new Map<string, Buffer | null>();
+      const changed: string[] = [];
+      try {
+        for (const [relative, data] of output) {
+          const full = await safePath(relative);
+          let previous: Buffer | null = null;
+          try { previous = await fs.readFile(full); } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
+          backups.set(relative, previous);
+          if (previous?.equals(data)) continue;
+          const diskBackup = path.join(stage, '.backup', relative);
+          if (previous) { await fs.mkdir(path.dirname(diskBackup), { recursive: true }); await fs.writeFile(diskBackup, previous); }
+          await fs.mkdir(path.dirname(full), { recursive: true });
+          changed.push(relative);
+          await fs.writeFile(full + '.github-import-tmp', data);
+          await fs.rename(full + '.github-import-tmp', full);
+          if (sha256(await fs.readFile(full)) !== sha256(data)) throw new Error(`Promoted file verification failed: ${relative}`);
+        }
+        await fs.mkdir(stateDir, { recursive: true });
+        const result = { requestId, manifestUrl, manifestSha256, sourceCommit, completedAt: new Date().toISOString(), files: [...output].map(([destination, data]) => ({ destination, sha256: sha256(data), size: data.length })), protected: ['src/main.tsx', 'src/dev/**', 'src/types/**', 'hidden viewer' ] };
+        await fs.writeFile(receiptPath + '.tmp', JSON.stringify(result, null, 2));
+        await fs.rename(receiptPath + '.tmp', receiptPath);
+      } catch (error) {
+        const failures: string[] = [];
+        for (const relative of changed.reverse()) {
+          const full = path.join(root, relative);
+          try {
+            const backup = backups.get(relative);
+            if (backup === null) await fs.rm(full, { force: true });
+            else if (backup) await fs.writeFile(full, backup);
+            await fs.rm(full + '.github-import-tmp', { force: true });
+          } catch { failures.push(relative); }
+        }
+        if (failures.length) throw new Error(`Import rollback failed for ${failures.join(', ')}. Recovery files retained at ${stage}`, { cause: error });
+        throw new Error('Import failed and live files were rolled back.', { cause: error });
+      }
+      await fs.rm(stage, { recursive: true, force: true });
+      console.log(`[github-import] Verified ${output.size} files; promoted ${changed.length}; source ${sourceCommit}; request ${requestId}.`);
+    },
+  };
+}
+
 ```
-
-Manifest URL:
-https://raw.githubusercontent.com/benryaus-cmd/barbie/95f8a722906c722aa525a11c924d7a9fa4b1da5d/aippy-import-manifest.json
-Expected manifest SHA-256:
-3cbb8aaa5c0414fcc793fe5f381be8f06c1869e71fc177634f8a7c20539bf0d6
-Exact game source commit:
-16a90ea658836bbb08886635f9f61a99da080a09
-Request ID:
-barbie-studio-16a90ea-v7
-
-Run the normal project build now. Use ONLY this pinned manifest, never current main, a recursive tree selector or an older Barbie manifest. Verify manifest bytes before parsing, schemaVersion:1, repository and exact sourceCommit. The awaited config hook must finish downloading and verifying all103 game files BEFORE later plugins scan sources and Vite compiles. Validate every safe src/public destination, exact pinned raw URL, byte size and SHA-256. Preserve binary bytes, bounded concurrency/retry, staging, backup, promotion and rollback. Await all in-flight workers before cleanup on error. A failed request must never compile a partially updated game.
-
-Keep the existing manifest asset behavior: merge EXACTLY its ten supplied original keys into the real src/config/assets.json, replacing those ten values while retaining unrelated host assets/radio streams. Verify assets.ts and create its wrapper ONLY if absent; preserve a compatible existing wrapper/default export. No new runtime dependencies are required. Do not replace package.json wholesale, install from a Vite hook, downgrade tools or impose Node22. The importer remains compatible with modern Node20/22.
-
-Preserve existing Vite/Aippy plugins, the Rapier optimizeDeps exclusion, main.tsx, hidden project viewer, secret Settings-title unlock/password, ZIP exporter, src/dev, src/types and unrelated files. Manifest-listed GameView.tsx and SettingsModal.tsx update directly at their matching live paths. Delete nothing: obsoleteGameFiles is empty. Never clear localStorage or reset wallets, owned clothing/colors, hairstyles, collector cards, friends, toys, saved sets, photos or followers.
-
-A second ordinary build with the SAME completed requestId MUST skip the update and preserve later Aippy edits. Do not mutate active config inside the hook. Record manifest URL/hash, sourceCommit, requestId, destinations and verified hashes in .github-import-state/receipt.json.
-
-THE FINISHED FASHION STUDIO UPDATE — APPLY EXACTLY:
-- Independent colours for all12extras, including earrings, choker and Starlet frames. Dedicated accessory materials prevent changes leaking into skin, clothes, shoes or lenses.
--26 clothing colours (18free plus collectible premium colours). Existing ownership migrates; a bought colour applies throughout the wardrobe.
-- Original/soft matte/satin/gloss/metallic/sparkle fabric finishes and solid/stripe/polka-dot/gingham/star/petal prints, with separate accent colours for top and bottom. Real procedural shader/material changes, not UI-only swatches. Existing clothes, microdetail, rigging and fit remain.
--16 hair colours with primary/secondary dye and Highlights, Ombré and Split dye layouts across all9hairstyles. Existing spring-bone hair stays intact.
-- New optional style values persist in the current look, personal outfit sets and photos. Legacy photos/reward identities stay valid; new visible outfit combinations extend DreamFeed variety.
--6 new solo poses: Chin frame, Hair touch, Folded arms, Leg pop, Kneel and Side sit. Five new duo compositions: Back to back, Linked arms, High five, Shoulder lean and Editorial, alongside the earlier3pairs. Actual player/friend poses, spacing, facing and mirroring change together. New standing/floor skirt correctives prevent thigh holes and floor penetration.
-- Photo camera has bounded screen-plane PAN in addition to orbit/pinch/zoom and a framing reset. One-finger mode toggles between orbit/pan; two fingers can pan/pinch. No instruction box covers the image.
-- The photo panel can MINIMISE into a small shutter/restore/exit bar; Clean screenshot view removes pose/shutter/zoom UI, leaving a small restore control. Selecting poses/people, minimise/restore and photo saves retain the composition. The MINIMISED SHUTTER captures the FULL portrait canvas; do not retain the old62%crop for minimised shots. Expanded photo/challenge framing keeps its existing crop behavior.
-- IMPORTANT DANCE FIX: actual venue dancing uses the EARLIER6.8phase dance-floor choreography again, separately from the photo Dance emote. Do NOT route dancing:true through the photo dance routine or substitute a generic pose.
-
-Keep every previous6.1fix: natural supporting-leg walk, correct elbow direction/narrow relaxed arms, hip-pose palm contact, fuller thigh depth, fitted weighted boots, mesh-fitted shirt/lips/necklace, native bone map/fingers and reusable carry/swing hooks. Preserve all9hairstyles, fashion/beauty, photo orbit/grouping, separate volleyball/netball, fallible Coco/best-of-three/replay, residents, activities, pets and settings. Sheets must retain BOTH onPose/onCapture forwarding to PhotoGame. DreamFeed stays fictional offline simulation. Apply the supplied game files exactly; do not reinterpret them or revert to old Social Summer/4.1/5.1/6.x source.
-
-AFTER THE ACTUAL BUILD:
-Report build result and receipt manifest URL/hash, exact sourceCommit, requestId and verified file count. All103 game entries must match; the receipt can additionally list the asset merge/wrapper (the verified fixture has105 total entries). Confirm these source hashes:
-- src/App.tsx: 1e2171a469f32a1163498f78a704625ffb9c40bc71f157300d5b5fc38cca247d
-- src/game/avatar.ts: c9b3c2ad50b554608270d03d3ea305cca01a6e0cf2e27fe3382435b605ae91a2
-- src/game/character/style-materials.ts: 1a04b2973e82508f03c9b09deda1537aaace9eeafe1bc14accab138671670765
-- src/game/character/motion-controller.ts: 23f330c0a7af3c03f752bfcd90b322453c70b548ff1326eb9b452e72331777b4
-- src/game/character/garment-rig.ts: 63b5d927d74ad5c5e9d1dcbc31898279fbcdf1ab4fe349a41817dc135df1962f
-- src/game/look-style.ts: 516a1a9c679c173931a81be1a9454866c0517870781cd18d6323116a2c67310a
-- src/game/lifestyle-save.ts: 5d704ecb0e1119b6a2a80c324209a8dc82c09a10f38b89f7da1c5555ee9c0a50
-- src/game/social.ts: 20f4d46a8defe2cc07aac719b12ca56eab3fef84c6be87420a0072388c3575bc
-- src/game/poses.ts: 604f02c71b6815bd732661a9daeecd263371970766fa260c4b44f00fbcf0ba53
-- src/game/camera.ts: 332831385e0b0fed946fb92be36ada4e8e898e0e1c0a9c5ce03bfe8ce4ec4a59
-- src/game/create-game.ts: 94346baf2ebe7510eace57682c852e27a2b6cf9b26e814b3e9c95851ace9f3dd
-- src/ui/PhotoStudio.tsx: 36dd5536caab8a587229bdf24ae3ecc19ccc93794b55f459d92bb68750d95369
-- src/ui/StyleOptions.tsx: 0b65d51042f1df75740ae248641bf74507c38d925e1d031675f9fdcb14093414
-- src/ui/Sheets.tsx: bfea48f227109d6f11ca0742da37adc42805e36e4696002c8caa86a7f885f10b
-
-Check all ten manifest asset values reached the real working registry and an unrelated existing key survived if one existed. At360x520 in the containing Aippy game frame: change fabric finish/print/accent and separate earring/choker/Starlet colours; verify actual doll materials change independently; combine primary/secondary hair and layouts; save/reload a set. Test new solo/duo selection, true pair placement, pan/reset, minimise/restore, clean view and full-frame minimised JPEG capture. Inspect poses from side angles for garment holes. Compare venue dancing with the separate photo dance. Confirm settings/hidden ZIP still works and existing saves survive. Report actual failures rather than creating replacement gameplay or claiming success from config alone.
