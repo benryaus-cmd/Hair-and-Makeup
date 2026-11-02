@@ -1,0 +1,15 @@
+export type TopId = 'glam'|'beach'|'popstar'|'casual'|'sunset'|'denim'|'sport'|'midnight';
+export type BottomId = 'gown'|'wrap'|'pleated'|'shorts'|'palazzo'|'tennis'|'denim-skirt'|'satin-mini';
+export type WearableId = 'tiara'|'sunglasses'|'earrings'|'necklace'|'bow'|'round-shades'|'star-shades'|'sunhat'|'beret'|'headband'|'choker'|'bracelets';
+export type MakeupId = 'fresh'|'rose'|'glam'|'sunset'|'bold';
+export type EyeStyle = 'soft'|'almond'|'wide';
+export type MouthStyle = 'smile'|'soft'|'full';
+export type FabricFinish = 'original'|'matte'|'satin'|'gloss'|'metallic'|'glitter';
+export type FabricPattern = 'solid'|'stripes'|'dots'|'gingham'|'stars'|'floral';
+export type HairBlend = 'streaks'|'ombre'|'split';
+export type Look = { top:TopId; bottom:BottomId; accessories:WearableId[]; topColor:string; bottomColor:string; hairColor?:string; hairSecondaryColor?:string; hairBlend?:HairBlend; accessoryColors?:Partial<Record<WearableId,string>>; topFinish?:FabricFinish; bottomFinish?:FabricFinish; topPattern?:FabricPattern; bottomPattern?:FabricPattern; topAccent?:string; bottomAccent?:string; makeup?:MakeupId; eyeStyle?:EyeStyle; mouthStyle?:MouthStyle; eyeColor?:string };
+export type PoseId = 'idle'|'wave'|'peace'|'heart'|'kiss'|'spin'|'dance'|'pet'|'surf'|'hug'|'arm-around'|'half-heart'|'salute'|'curtsy'|'jump'|'confident'|'look-back'|'cheer'|'shy'|'point'|'stretch'|'chin-frame'|'hair-touch'|'crossed-arms'|'leg-pop'|'kneel'|'side-sit'|'back-to-back'|'linked-arms'|'high-five'|'shoulder-lean'|'editorial';
+export type ActivityKind = 'surf'|'pour'|'netball'|'volley';
+export type ActivityState = { kind:ActivityKind; progress:number; score:number; combo:number; timeLeft:number; feedback:string; finished:boolean; round?:number; fill?:number; target?:number; opponentScore?:number; playerPoints?:number };
+export type PetAction = 'pat'|'ball'|'frisbee'|'treat'|'idle'|'follow'|'bed'|'whistle';
+export type ResidentInfo = {id:string;name:string;role:string;color:string;bio:string};

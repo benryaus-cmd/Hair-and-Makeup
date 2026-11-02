@@ -1,0 +1,60 @@
+{
+  "name": "hair-and-makeup",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "packageManager": "pnpm@10.10.0",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:dev": "vite build --mode development",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json --noEmit",
+    "test": "node --test tests/profile.test.mjs tests/preferences.test.mjs tests/importer.test.mjs tests/lifestyle.test.mjs tests/social.test.mjs tests/activities.test.mjs tests/look-style.test.mjs && node tests/joystick-runtime.cjs && node tests/stage-controls-runtime.cjs && node tests/photo-runtime.cjs && node tests/activity-runtime.cjs && node tests/engine-runtime.cjs && node tests/camera-runtime.cjs && node tests/pet-runtime.cjs && node tests/pet-panel-runtime.cjs && node tests/movement-runtime.cjs && node tests/world-physics-runtime.cjs && node tests/camera-controls-runtime.cjs && node tests/garment-rig-runtime.cjs && node tests/hair-rig-runtime.cjs && node tests/face-runtime.cjs && node tests/character-runtime.cjs && node tests/limb-rig-runtime.cjs && node tests/character-resources.cjs && node tests/rear-gait-runtime.cjs && node tests/trouser-rig-runtime.cjs && node tests/necklace-rig-runtime.cjs && node tests/surface-map-runtime.cjs && node tests/boot-rig-runtime.cjs && node tests/hand-rig-runtime.cjs && node tests/motion-controller-runtime.cjs && node tests/body-rig-runtime.cjs && node tests/walk-alignment-runtime.cjs && node tests/photo-pan-runtime.cjs && node tests/style-materials-runtime.cjs && node tests/poses-v7-runtime.cjs && node --test tests/startup-model.test.mjs && node tests/studio-rendering-runtime.cjs && node tests/studio-collection-runtime.cjs && node tests/studio-camera-runtime.cjs",
+    "test:browser": "npm run build && node scripts/browser-check-v4.mjs",
+    "test:fashion": "node tests/fashion-browser.mjs",
+    "test:browser:v3": "node scripts/browser-check-v3.mjs",
+    "test:chrome-layout": "node tests/chrome-layout-browser.mjs",
+    "test:characters": "node tests/character-browser.mjs",
+    "test:fit": "node tests/fit-browser.mjs",
+    "test:motion": "node tests/motion-browser.mjs",
+    "test:walk": "node tests/walk-browser.mjs",
+    "test:studio": "node tests/studio-browser.mjs",
+    "test:studio-boot": "node tests/studio-boot-browser.mjs"
+  },
+  "dependencies": {
+    "@ai-sdk/react": "^3.0.269",
+    "@aippy/runtime": "^0.4.1",
+    "@dimforge/rapier3d": "0.21.0",
+    "@viggle/splat-engine-three": "0.1.0",
+    "fflate": "^0.8.2",
+    "lucide-react": "^1.34.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "three": "0.186.1",
+    "tone": "^15.1.22"
+  },
+  "devDependencies": {
+    "@aippy/vite-plugins": "0.4.0",
+    "@eslint/js": "^10.0.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.5",
+    "@vitejs/plugin-react-swc": "^4.3.3",
+    "eslint": "^10.0.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^16.5.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.68.0",
+    "vite": "^8.2.2",
+    "vite-plugin-singlefile": "^2.3.3",
+    "jsdom": "^26.1.0",
+    "playwright": "^1.56.1"
+  }
+}

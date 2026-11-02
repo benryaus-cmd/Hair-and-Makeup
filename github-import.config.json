@@ -1,0 +1,10 @@
+{
+  "enabled": false,
+  "mode": "manifest",
+  "repository": "benryaus-cmd/Hair-and-Makeup",
+  "branch": "main",
+  "manifestUrl": "",
+  "manifestSha256": "",
+  "sourceCommit": "",
+  "requestId": ""
+}
