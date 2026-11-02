@@ -11,6 +11,7 @@ try{
  const first=await page.evaluate(()=>window.posterInk.measure());console.log(first);
  assert(first.antialias&&first.samples>0,'Android path requests a multisampled drawing buffer');assert(first.left>0,'lit contour remains readable');assert(first.right>=first.left*1.5,'shadow contour has visibly greater pixel width');
  await page.evaluate(()=>window.posterInk.rotate());const rotated=await page.evaluate(()=>window.posterInk.measure());assert(Math.abs(first.right-rotated.right)<=1,'weight follows world light rather than mesh face indexing');assert.deepEqual(errors,[]);
- await mkdir('.test-output',{recursive:true});await page.screenshot({path:'.test-output/poster-ink-fixture.png'});await writeFile('.test-output/poster-ink-report.json',JSON.stringify({first,rotated,errors},null,2));
- console.log('PASS Android MSAA, lit/shadow pixel widths and rotated contour stability');
+ const fringe=await page.evaluate(()=>window.posterInk.fringeProbe());assert.equal(fringe.white,0,'rough backlit cylinder must not develop a white specular seam');assert.deepEqual(errors,[]);
+ await mkdir('.test-output',{recursive:true});await page.screenshot({path:'.test-output/poster-ink-fixture.png'});await writeFile('.test-output/poster-ink-report.json',JSON.stringify({first,rotated,fringe,errors},null,2));
+ console.log('PASS Android MSAA, lit/shadow pixel widths and rotated contour stability and grazing specular fringe');
 }finally{await browser.close();await server.close();}

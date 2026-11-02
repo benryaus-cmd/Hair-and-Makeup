@@ -12,11 +12,14 @@ export function studioMaterial(material: THREE.MeshStandardMaterial, kind: Studi
     previous.call(material, shader, renderer);
     shader.uniforms.studioStrength = { value: kind === 'world' ? .72 : .76 };
     shader.fragmentShader = 'uniform float studioStrength;\n' + shader.fragmentShader;
+    // Keep the physical cosine for GGX specular. A nonzero toon floor fed
+    // into specular irradiance creates unbounded white fringes at grazing angles.
     const physical=THREE.ShaderChunk.lights_physical_pars_fragment.replace(
-      'float dotNL = saturate( dot( geometryNormal, directLight.direction ) );',
+      'reflectedLight.directDiffuse += irradiance * BRDF_Lambert',
       `float studioNL = saturate(dot(geometryNormal,directLight.direction));
        float studioRamp = 0.035 + 0.49*smoothstep(0.10,0.22,studioNL) + 0.475*smoothstep(0.55,0.67,studioNL);
-       float dotNL = mix(studioNL,studioRamp,studioStrength*0.95);`
+       vec3 studioDiffuseIrradiance = directLight.color * mix(studioNL,studioRamp,studioStrength*0.95);
+       reflectedLight.directDiffuse += studioDiffuseIrradiance * BRDF_Lambert`
     );
     shader.fragmentShader=shader.fragmentShader.replace('#include <lights_physical_pars_fragment>',physical);
     shader.fragmentShader = shader.fragmentShader.replace('#include <opaque_fragment>', `

@@ -5,6 +5,8 @@ const mat=new THREE.MeshStandardMaterial();let previous=0;mat.onBeforeCompile=s=
 studioMaterial(mat,'hair');studioMaterial(mat,'hair');
 const shader={uniforms:{},vertexShader:THREE.ShaderLib.standard.vertexShader,fragmentShader:THREE.ShaderLib.standard.fragmentShader};mat.onBeforeCompile(shader,{});
 assert.equal(previous,1,'existing wardrobe shader runs exactly once');assert(shader.fragmentShader.includes('studioSilk'),'hair has directional silk lighting');assert(shader.fragmentShader.includes('// wardrobe remains'));assert.equal((shader.fragmentShader.match(/uniform float studioStrength/g)||[]).length,1);assert(mat.customProgramCacheKey().includes('wardrobe'));
+assert(shader.fragmentShader.includes('float dotNL = saturate( dot( geometryNormal, directLight.direction ) );'),'specular irradiance must retain the physical cosine, including zero for backlit surfaces');
+assert(shader.fragmentShader.includes('studioDiffuseIrradiance'),'toon ramp applies to diffuse separately');
 const {arrivalShot,ARRIVAL_SECONDS}=compile('arrival');
 for(const t of [-1,0,1,3.5,6.9,7,20]){const s=arrivalShot(t,new THREE.Vector3(7,.55,-13),new THREE.Vector3(7,3, -6));assert(s.position.toArray().every(Number.isFinite));assert(s.target.toArray().every(Number.isFinite));assert(s.progress>=0&&s.progress<=1);}
 assert.equal(ARRIVAL_SECONDS,7);const end=arrivalShot(7,new THREE.Vector3(),new THREE.Vector3(0,3,7));assert(end.position.distanceTo(new THREE.Vector3(0,3,7))<1e-6,'arrival lands at actual gameplay camera without a hard cut');
