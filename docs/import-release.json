@@ -1,9 +1,9 @@
 {
   "repository": "benryaus-cmd/Hair-and-Makeup",
-  "sourceCommit": "bac15dcf2e7422dce80ff6e26bb6e4217f72de67",
-  "manifestCommit": "8084bbec1c9a84cf16a7ef34aae0f214c8253162",
-  "manifestUrl": "https://raw.githubusercontent.com/benryaus-cmd/Hair-and-Makeup/8084bbec1c9a84cf16a7ef34aae0f214c8253162/aippy-import-manifest.json",
-  "manifestSha256": "2dfb8dcda062232eb8eb362d550e91cb217819e427bd2812611834579b5766d0",
-  "requestId": "hair-makeup-studio-v1-bac15dcf2e74",
+  "sourceCommit": "567affa0838637cd1265eeec0ee693a506d3f5b1",
+  "manifestCommit": "21dc228beb45f7a8cf5d8e5a6504816a71986463",
+  "manifestUrl": "https://raw.githubusercontent.com/benryaus-cmd/Hair-and-Makeup/21dc228beb45f7a8cf5d8e5a6504816a71986463/aippy-import-manifest.json",
+  "manifestSha256": "c872ff7a13f0f6f27a198b5e5dce2755ab096c5cf998addd48a57947512fb391",
+  "requestId": "hair-makeup-studio-v1-567affa08386",
   "files": 113
 }

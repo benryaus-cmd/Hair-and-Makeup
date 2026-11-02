@@ -2,8 +2,8 @@
 
 The current prepared prompt is `AIPPY_UPDATE_PROMPT.txt`; release identities are in `docs/import-release.json`.
 
-- Source snapshot: `bac15dcf2e7422dce80ff6e26bb6e4217f72de67`
-- Manifest snapshot: `8084bbec1c9a84cf16a7ef34aae0f214c8253162`
+- Source snapshot: `567affa0838637cd1265eeec0ee693a506d3f5b1`
+- Manifest snapshot: `21dc228beb45f7a8cf5d8e5a6504816a71986463`
 - Game files: 113
 - Asset keys: 10
 

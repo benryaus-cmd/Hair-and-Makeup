@@ -22,20 +22,20 @@ Mount the genuine updated game directly in src/. Do not recreate it from a descr
   "enabled": true,
   "mode": "manifest",
   "repository": "benryaus-cmd/Hair-and-Makeup",
-  "manifestUrl": "https://raw.githubusercontent.com/benryaus-cmd/Hair-and-Makeup/8084bbec1c9a84cf16a7ef34aae0f214c8253162/aippy-import-manifest.json",
-  "manifestSha256": "2dfb8dcda062232eb8eb362d550e91cb217819e427bd2812611834579b5766d0",
-  "sourceCommit": "bac15dcf2e7422dce80ff6e26bb6e4217f72de67",
-  "requestId": "hair-makeup-studio-v1-bac15dcf2e74"
+  "manifestUrl": "https://raw.githubusercontent.com/benryaus-cmd/Hair-and-Makeup/21dc228beb45f7a8cf5d8e5a6504816a71986463/aippy-import-manifest.json",
+  "manifestSha256": "c872ff7a13f0f6f27a198b5e5dce2755ab096c5cf998addd48a57947512fb391",
+  "sourceCommit": "567affa0838637cd1265eeec0ee693a506d3f5b1",
+  "requestId": "hair-makeup-studio-v1-567affa08386"
 }
 5. Run the real build. It will fetch the checksum-verified manifest and write 113 game files into their exact src/public destinations. It merges 10 asset keys while preserving unrelated host assets and its existing assets.ts wrapper. The updated App.tsx is the game entry; keep the existing main.tsx mounting it once. If src/ui/StartScreen.tsx remains from an older version, delete that retired component after fetching the new App; it is no longer used and its image must not be preloaded.
 6. Keep the current hidden file viewer if present. If its file filter excludes every name containing 'token', narrow that to credential-token filenames: src/game/tokens.ts is gameplay source and must remain in the project.
 7. Run lint/typecheck and production build; fix integration errors in the actual working files. Do not create optimised copies. Confirm that the loader advances from actual scene readiness into the skippable in-world arrival, then gameplay. Verify wardrobe/makeup, camera/feed, album and controls. A generated manifest/config alone is not proof that source recovery ran: inspect the completion receipt and the fetched file count.
 
-SOURCE COMMIT: bac15dcf2e7422dce80ff6e26bb6e4217f72de67
-MANIFEST URL: https://raw.githubusercontent.com/benryaus-cmd/Hair-and-Makeup/8084bbec1c9a84cf16a7ef34aae0f214c8253162/aippy-import-manifest.json
-MANIFEST SHA-256: 2dfb8dcda062232eb8eb362d550e91cb217819e427bd2812611834579b5766d0
+SOURCE COMMIT: 567affa0838637cd1265eeec0ee693a506d3f5b1
+MANIFEST URL: https://raw.githubusercontent.com/benryaus-cmd/Hair-and-Makeup/21dc228beb45f7a8cf5d8e5a6504816a71986463/aippy-import-manifest.json
+MANIFEST SHA-256: c872ff7a13f0f6f27a198b5e5dce2755ab096c5cf998addd48a57947512fb391
 EXPECTED GAME FILES: 113
-REQUEST ID: hair-makeup-studio-v1-bac15dcf2e74
+REQUEST ID: hair-makeup-studio-v1-567affa08386
 
 COMPLETE vite-plugin-github-import.ts:
 ```typescript
