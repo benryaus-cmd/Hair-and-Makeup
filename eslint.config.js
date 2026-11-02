@@ -23,7 +23,7 @@ export default [
       ecmaVersion: 2020,
       globals: globals.browser,
       parserOptions: {
-        projectService: {allowDefaultProject:["tests/character-fixture.ts"]},
+        projectService: {allowDefaultProject:["tests/character-fixture.ts","tests/poster-ink-fixture.ts"]},
         tsconfigRootDir: import.meta.dirname,
       },
     },

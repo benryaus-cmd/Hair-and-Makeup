@@ -7,7 +7,7 @@ This project copies the source of `benryaus-cmd/barbie` at `71a9680c4b55a40e863c
 ## This version
 
 - Genuine scene/shader loading, followed by a skippable fashion-show walk and editorial pose on the catwalk. No image title screen.
-- Black silhouette outlines on animated dolls, clothes and nearby architecture, plus stronger toon shading that retains prints, dye, metallic finishes and glitter.
+- Light-driven poster ink: thicker shadow contours taper to fine lit edges, with smoothed extrusion normals, mobile antialiasing and cool toon shadows. Prints, dye, metallic finishes and glitter remain.
 - Travel-driven NPC walking with knee bend, planted steps and heel/toe articulation.
 - Black-and-ivory runway, front-row seating, lighting, fashion displays and a clear catwalk.
 - Procedural ocean, shoreline foam, sun glints, palm wind, planted arrival plaza and upgraded salon/boutique architecture.

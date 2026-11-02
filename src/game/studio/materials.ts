@@ -20,22 +20,24 @@ export function studioMaterial(material: THREE.MeshStandardMaterial, kind: Studi
     );
     shader.fragmentShader=shader.fragmentShader.replace('#include <lights_physical_pars_fragment>',physical);
     shader.fragmentShader = shader.fragmentShader.replace('#include <opaque_fragment>', `
-      // Broad pastel fill and restrained rim: retain the authored material response.
-      float studioFacing = max(dot(normalize(normal), normalize(vViewPosition)), 0.0);
-      float studioRim = pow(1.0 - studioFacing, 3.0);
-      vec3 studioFill = diffuseColor.rgb * vec3(0.035, 0.025, 0.045);
-      outgoingLight += studioFill * studioStrength;
-      outgoingLight += vec3(1.0, 0.74, 0.81) * studioRim * studioStrength * 0.10;
+      // Cool printed shadows and warm lit planes, without a white silhouette rim.
+      vec3 studioNormal=normalize(normal);
+      vec3 studioWorldNormal=inverseTransformDirection(studioNormal,viewMatrix);
+      float studioKey=dot(studioWorldNormal,normalize(vec3(-25.0,18.0,-12.0)));
+      float studioLit=smoothstep(-0.10,0.55,studioKey);
+      vec3 studioTint=mix(vec3(0.70,0.63,0.88),vec3(1.04,1.0,0.94),studioLit);
+      outgoingLight*=mix(vec3(1.0),studioTint,studioStrength*0.65);
+      outgoingLight+=diffuseColor.rgb*vec3(0.025,0.018,0.04)*studioStrength;
       ${kind === 'hair' ? `
       // A directional band on the lit volume, not separate floating strands.
       float studioSilk = pow(max(0.0, 1.0-abs(normalize(normal).y-0.28)), 14.0);
       float studioSilkBreak = 0.8 + 0.2*sin(normal.x*37.0+normal.z*17.0);
-      outgoingLight += mix(diffuseColor.rgb, vec3(1.0,0.88,0.71),0.38) * studioSilk * studioSilkBreak * 0.19;
+      outgoingLight += mix(diffuseColor.rgb, vec3(1.0,0.88,0.71),0.20) * studioSilk * studioSilkBreak * 0.12;
       ` : ''}
       #include <opaque_fragment>
     `);
   };
-  material.customProgramCacheKey = () => `${cacheKey}|studio-soft-v1:${kind}`;
+  material.customProgramCacheKey = () => `${cacheKey}|studio-poster-v2:${kind}`;
   material.needsUpdate = true;
   return material;
 }

@@ -32,7 +32,7 @@ export function createRenderer(
   try {
     renderer = options.createContext
       ? options.createContext()
-      : new THREE.WebGLRenderer({ antialias: !(/Android|iPhone|iPad/i.test(typeof navigator === 'undefined' ? '' : navigator.userAgent)), alpha: false, powerPreference: 'high-performance' });
+      : new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
   } catch {
     options.onError(WEBGL_ERROR);
     return null;
