@@ -1,5 +1,5 @@
-export type TopId = 'glam'|'beach'|'popstar'|'casual'|'sunset'|'denim'|'sport'|'midnight';
-export type BottomId = 'gown'|'wrap'|'pleated'|'shorts'|'palazzo'|'tennis'|'denim-skirt'|'satin-mini';
+export type TopId = 'glam'|'beach'|'popstar'|'casual'|'sunset'|'denim'|'sport'|'midnight'|'cloth-top';
+export type BottomId = 'gown'|'wrap'|'pleated'|'shorts'|'palazzo'|'tennis'|'denim-skirt'|'satin-mini'|'cloth-gown';
 export type WearableId = 'tiara'|'sunglasses'|'earrings'|'necklace'|'bow'|'round-shades'|'star-shades'|'sunhat'|'beret'|'headband'|'choker'|'bracelets';
 export type MakeupId = 'fresh'|'rose'|'glam'|'sunset'|'bold';
 export type EyeStyle = 'soft'|'almond'|'wide';
