@@ -44,7 +44,7 @@ export function WardrobeSheet({title,outfit,hair,shoes,unlocked,points,notice,on
     {notice?<p className="wardrobe-notice" role="status">{notice}</p>:null}
     <div id="wardrobe-options" className="fashion-options" role="tabpanel" aria-labelledby={`wardrobe-tab-${category}`}>
       {category==='Tops'||category==='Bottoms'||category==='Extras'?<>
-        <div className="fashion-section-heading"><h3>{category==='Extras'?'Layer your finishing touches':`Mix & match ${category.toLowerCase()}`}</h3><span>{category==='Extras'?'Wear any together':'8 silhouettes'}</span></div>
+        <div className="fashion-section-heading"><h3>{category==='Extras'?'Layer your finishing touches':`Mix & match ${category.toLowerCase()}`}</h3><span>{category==='Extras'?'Wear any together':`${catalog.length} silhouettes`}</span></div>
         <div className="fashion-grid">
           {catalog.map(item=>{
             const owned=item.price===0||ownedFashion.includes(`${slot}:${item.id}`);
