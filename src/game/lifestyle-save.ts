@@ -5,8 +5,8 @@ import type { Look, TopId, BottomId, WearableId, MakeupId } from './lifestyle-ty
 export type SavedLook = { id:string; name:string; look:Look; hair:HairId; shoes:ShoesId };
 export type LifestyleSave = { look:Look; ownedFashion:string[]; ownedColors:string[]; savedLooks:SavedLook[]; toys:string[]; petBond:number; lastPetReward:number; friends:Record<string,number>; topics:Record<string,string[]> };
 export const LIFESTYLE_KEY='barbie-ultimate-dreamland:lifestyle-v2';
-const tops:TopId[]=['glam','beach','popstar','casual','sunset','denim','sport','midnight'];
-const bottoms:BottomId[]=['gown','wrap','pleated','shorts','palazzo','tennis','denim-skirt','satin-mini'];
+const tops:TopId[]=['glam','beach','popstar','casual','sunset','denim','sport','midnight','cloth-top'];
+const bottoms:BottomId[]=['gown','wrap','pleated','shorts','palazzo','tennis','denim-skirt','satin-mini','cloth-gown'];
 const extras:WearableId[]=['tiara','sunglasses','earrings','necklace','bow','round-shades','star-shades','sunhat','beret','headband','choker','bracelets'];
 const hairs:HairId[]=['blonde','pink','updo','bob','curls','braids','pixie','twin-buns','straight'];
 const shoes:ShoesId[]=['heels','sneakers','boots','sandals','platforms'];
@@ -20,7 +20,7 @@ export function migrateLifestyle(profile:Profile,value?:unknown):LifestyleSave {
  const p=value&&typeof value==='object'?value as Partial<LifestyleSave>:{};
  const pair=preset[profile.outfit]||preset.glam;
  const validOwned=new Set([...tops.map(x=>'top:'+x),...bottoms.map(x=>'bottom:'+x),...extras.map(x=>'accessory:'+x)]);
- const owned=[...new Set([...profile.unlocked.flatMap(x=>['top:'+preset[x][0],'bottom:'+preset[x][1]]),'accessory:tiara','accessory:sunglasses','accessory:earrings',...(Array.isArray(p.ownedFashion)?p.ownedFashion.filter(x=>validOwned.has(x)):[])])];
+ const owned=[...new Set([...profile.unlocked.flatMap(x=>['top:'+preset[x][0],'bottom:'+preset[x][1]]),'accessory:tiara','accessory:sunglasses','accessory:earrings','top:cloth-top','bottom:cloth-gown',...(Array.isArray(p.ownedFashion)?p.ownedFashion.filter(x=>validOwned.has(x)):[])])];
  const ownedColors=[...new Set([...freeColors,...(Array.isArray(p.ownedColors)?p.ownedColors.filter(x=>typeof x==='string'&&premiumColors.includes(x.toLowerCase())).map(x=>x.toLowerCase()):[])])];
  const sanitizeLook=(value:unknown):Look=>{
   const input=value&&typeof value==='object'?value as Partial<Look>:{};
