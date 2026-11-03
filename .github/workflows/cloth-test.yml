@@ -1,0 +1,26 @@
+name: Cloth gown and blouse test
+on:
+  push:
+    paths:
+      - "src/game/character/cloth-test-rig.ts"
+      - "src/game/avatar.ts"
+      - "src/game/fashion.ts"
+      - "src/game/lifestyle-types.ts"
+      - "src/ui/WardrobeSheet.tsx"
+      - "tests/cloth-test-runtime.cjs"
+      - "package.json"
+      - ".github/workflows/cloth-test.yml"
+  workflow_dispatch:
+jobs:
+  cloth:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: node tests/cloth-test-runtime.cjs
