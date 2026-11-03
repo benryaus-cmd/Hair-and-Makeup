@@ -12,6 +12,7 @@ export const TOPS:FashionItem<TopId>[] = [
   {id:'denim',label:'Cropped jacket',price:50,color:'#658fda'},
   {id:'sport',label:'Court polo',price:30,color:'#53dbe4'},
   {id:'midnight',label:'Velvet one shoulder',price:70,followers:100,color:'#493355'},
+  {id:'cloth-top',label:'Airflow blouse · cloth test',price:0,color:'#6fcbd2'},
 ];
 export const BOTTOMS:FashionItem<BottomId>[] = [
   {id:'gown',label:'Satin ballgown',price:0,color:'#ec4899'},
@@ -22,6 +23,7 @@ export const BOTTOMS:FashionItem<BottomId>[] = [
   {id:'tennis',label:'Court skirt',price:30,color:'#fffaf3'},
   {id:'denim-skirt',label:'Denim pencil',price:40,color:'#658fda'},
   {id:'satin-mini',label:'Midnight mini',price:60,followers:40,color:'#493355'},
+  {id:'cloth-gown',label:'Flowing gown · cloth test',price:0,color:'#6fcbd2'},
 ];
 export const EXTRAS:FashionItem<WearableId>[] = [
   {id:'tiara',label:'Crystal tiara',price:0,color:'#f6c35e'},
