@@ -5,6 +5,7 @@ import { PALETTE } from '@/game/palette';
 import type { BottomId, Look, PoseId, TopId, WearableId } from '@/game/lifestyle-types';
 import { DEFAULT_LOOK, presetLook, MAKEUP_LOOKS } from '@/game/fashion';
 import { createGarmentRig } from '@/game/character/garment-rig';
+import { createClothTestRig } from '@/game/character/cloth-test-rig';
 import { createHairRig } from '@/game/character/hair-rig';
 import { createFace } from '@/game/character/face';
 import { applyCharacterSurface } from '@/game/character/surfaces';
@@ -129,7 +130,7 @@ export function createAvatar(): Avatar {
   const legs: Array<{ hip: THREE.Bone; knee: THREE.Bone; ankle: THREE.Bone }> = [];
   const arms: Array<{ shoulder: THREE.Bone; elbow: THREE.Bone; wrist: THREE.Bone }> = [];
   const shoes: Record<ShoesId, THREE.Group[]> = { heels: [], sneakers: [], boots: [], sandals: [], platforms: [] };
-  const bottomMaterials = Object.fromEntries(['gown','wrap','pleated','shorts','palazzo','tennis','denim-skirt','satin-mini'].map(id => [id, mat(0xec4899, id === 'shorts' || id === 'denim-skirt' ? .83 : .5)])) as Record<BottomId,Mat>;
+  const bottomMaterials = Object.fromEntries(['gown','wrap','pleated','shorts','palazzo','tennis','denim-skirt','satin-mini','cloth-gown'].map(id => [id, mat(0xec4899, id === 'shorts' || id === 'denim-skirt' ? .83 : .5)])) as Record<BottomId,Mat>;
   const bangles:THREE.Group[]=[];
   
   for (const side of [-1, 1]) {
@@ -326,13 +327,26 @@ export function createAvatar(): Avatar {
   add(choker,new THREE.OctahedronGeometry(.019),gold,[0,.469,.080]);
 
   const skirtPivots:THREE.Group[] = [];
+  let clothTopRig:ReturnType<typeof createClothTestRig>|null=null;
+  let clothGownRig:ReturnType<typeof createClothTestRig>|null=null;
   const tops = {} as Record<TopId,THREE.Group>;
   const topMaterials = {} as Record<TopId,Mat>;
   const necklaceSurfaces={} as Record<TopId,SurfaceMap>;
   const bodySkin=spine.children.filter((node):node is THREE.Mesh=>node instanceof THREE.Mesh&&node.material===skin);
-  for(const id of ['glam','beach','popstar','casual','sunset','denim','sport','midnight'] as TopId[]) {
+  for(const id of ['glam','beach','popstar','casual','sunset','denim','sport','midnight','cloth-top'] as TopId[]) {
     const top=joint(spine,`top ${id}`); tops[id]=top;
     const fabric=mat(0xec4899,id==='denim'?.83:id==='midnight'?.76:.48); topMaterials[id]=fabric;
+    if(id==='cloth-top') {
+      // Separate simulated mesh, anchored neckline and springy floating waist.
+      const cloth=joint(top,'Airflow blouse cloth shell');
+      clothTopRig=createClothTestRig(cloth,fabric,'top');
+      for(const side of [-1,1])line(top,fabric,
+        [[side*.135,.375,.105],[side*.16,.462,.015],[side*.168,.41,-.075]],.016,10);
+      const clothes:THREE.Mesh[]=[];
+      top.traverse(node=>{if(node instanceof THREE.Mesh)clothes.push(node);});
+      necklaceSurfaces[id]=createSurfaceMap([...bodySkin,...clothes],spine);
+      continue;
+    }
     const low=id==='beach'?.22:id==='sunset'?.16:id==='denim'?.10:.035;
     const points:Profile=[[0,low],[.146,low],[.144,Math.max(low,.14)],[.17,.26],[.207,.33],[.194,.37]];
     const bodice=profile(top,fabric,points,.74);bodice.name='bodice surface';
@@ -377,10 +391,18 @@ export function createAvatar(): Avatar {
     necklaceSurfaces[id]=createSurfaceMap([...bodySkin,...clothes],spine);
   }
   const bottoms={} as Record<BottomId,THREE.Group>;
-  for(const id of ['gown','wrap','pleated','shorts','palazzo','tennis','denim-skirt','satin-mini'] as BottomId[]) {
+  for(const id of ['gown','wrap','pleated','shorts','palazzo','tennis','denim-skirt','satin-mini','cloth-gown'] as BottomId[]) {
     const bottom=joint(pelvis,`bottom ${id}`); bottoms[id]=bottom;
     const fabric=bottomMaterials[id];
     if(id==='shorts'||id==='palazzo') continue;
+    if(id==='cloth-gown') {
+      // Separate mass-spring surface with collisions against both animated legs.
+      profile(bottom,fabric,[[.18,-.095],[.181,-.025],[.165,.057]],.79);
+      ring(bottom,gold,.168,.006,[0,.05,0],.82);
+      const cloth=joint(bottom,'Cloth gown spring shell');
+      clothGownRig=createClothTestRig(cloth,fabric,'gown',legs);
+      continue;
+    }
     profile(bottom,fabric,[[.18,-.105],[.183,-.035],[.149,.058]],.79);
     ring(bottom,id==='denim-skirt'?ivory:gold,.15,.006,[0,.05,0],.79);
     const skirt=joint(bottom,`${id} skirt`);skirtPivots.push(skirt);
@@ -484,6 +506,7 @@ export function createAvatar(): Avatar {
   }
   sync();
   let activeBottom:BottomId|null=null;
+  let activeTop:TopId|null=null;
   return {
     group, rig:bodyRig,setLook,
     setPose(pose) {state.pose=pose;},
@@ -502,7 +525,7 @@ export function createAvatar(): Avatar {
       else if(state.actionActive){state.actionElapsed=Math.min(1.05,state.actionElapsed+step);if(state.actionElapsed>=1.05)state.actionActive=false;}
       const soleHeight={heels:.099,sneakers:.09,sandals:.075,platforms:.106,boots:.094}[state.shoes];
       const pedestrian=motion.moving&&motion.grounded&&!motion.sitting&&!motion.dancing&&state.cheer<=0?motion.locomotionFrame:undefined;
-      const frame=pedestrian??controller.update(step,{...motion,pose:state.pose,dancing:motion.dancing||state.cheer>0,heading:group.rotation.y,soleHeight,armSpace:['gown','pleated','tennis','wrap'].includes(state.look.bottom)?.045:0,carry:state.actionActive&&state.carry==='none'?'one-hand':state.carry,swing:state.actionActive?state.actionElapsed/1.05:null});
+      const frame=pedestrian??controller.update(step,{...motion,pose:state.pose,dancing:motion.dancing||state.cheer>0,heading:group.rotation.y,soleHeight,armSpace:['gown','cloth-gown','pleated','tennis','wrap'].includes(state.look.bottom)?.045:0,carry:state.actionActive&&state.carry==='none'?'one-hand':state.carry,swing:state.actionActive?state.actionElapsed/1.05:null});
       state.phase=frame.phase;pelvis.position.y=frame.pelvisY;neck.rotation.set(0,0,0);
       // The controller already blends actions. A second joint filter would drag solved feet.
       for(const [key,rotation] of Object.entries(frame.rotations)) {
@@ -531,7 +554,11 @@ export function createAvatar(): Avatar {
       for(const trousers of trouserRigs)if(trousers.root.visible)trousers.update();
       if(necklace.visible)necklaceRig.update(step,{...motion,phase:state.phase});
       for(const item of garmentRigs)if(item.skirt.parent?.visible)item.rig.update(step,{...motion,speed:pedestrian?4.5:motion.speed,pose:!motion.moving&&!motion.sitting?state.pose:'idle',phase:state.phase},activeBottom!==state.look.bottom);
-      activeBottom=state.look.bottom;
+      // Only the two free experiment pieces incur CPU cloth integration.
+      const clothMotion={...motion,phase:state.phase,speed:pedestrian?4.5:motion.speed,dancing:motion.dancing||state.cheer>0};
+      if(state.look.bottom==='cloth-gown')clothGownRig?.update(step,clothMotion,activeBottom!=='cloth-gown');
+      if(state.look.top==='cloth-top')clothTopRig?.update(step,clothMotion,activeTop!=='cloth-top');
+      activeBottom=state.look.bottom; activeTop=state.look.top;
       for(const item of hairRigs)if(item.sway.parent?.visible)item.rig.update(step,{...motion,phase:state.phase});
 
     },
