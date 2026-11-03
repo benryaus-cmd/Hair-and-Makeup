@@ -23,6 +23,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: node tests/cloth-test-runtime.cjs
+      - run: npm run build
       # Existing TS errors in face, garment-rig and surface-map precede this
       # experiment; keep their diagnostics visible without blocking cloth QA.
       - name: Repository-wide typecheck (pre-existing issues)
